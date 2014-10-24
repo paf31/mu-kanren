@@ -5,7 +5,8 @@ module.exports = function(grunt) {
   grunt.initConfig({ 
   
     libFiles: [
-      "src/**/*.purs",
+      "bower_components/**/src/**/*.purs",
+      "src/**/*.purs"
     ],
     
     clean: ["tmp", "output"],

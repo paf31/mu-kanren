@@ -1,5 +1,9 @@
 module Kanren where
 
+import Data.Maybe
+import Data.Tuple
+import Data.Foldable
+
 newtype Var = Var Number
 
 instance eqVar :: Eq Var where
@@ -7,7 +11,7 @@ instance eqVar :: Eq Var where
   (/=) (Var v1) (Var v2) = v1 /= v2
 
 instance showVar :: Show Var where
-  show (Var v)= show v
+  show (Var v) = show v
 
 zero :: Var
 zero = Var 0
@@ -34,27 +38,14 @@ instance showTerm :: Show Term where
   show (TmObj o) = show o
   show (TmPair t1 t2) = "(" ++ show t1 ++ ", " ++ show t2 ++ ")"
 
-data Subst
-  = SNil
-  | SCons Var Term Subst
-
-instance showSubst :: Show Subst where
-  show sub = "[" ++ go sub ++ "]"
-    where
-    go SNil = ""
-    go (SCons v t SNil) = show v ++ ": " ++ show t
-    go (SCons v t s) = show v ++ ": " ++ show t ++ ", " ++ go s
+type Subst = [Tuple Var Term]
 
 walk :: Subst -> Term -> Term
-walk s (TmVar v) = go s v
-  where
-  go SNil v = TmVar v
-  go (SCons v t s) v1 | v == v1 = t
-  go (SCons _ _ s) v1 = go s v1
+walk s (TmVar v) = fromMaybe (TmVar v) $ lookup v s
 walk _ t = t
 
 ext :: Var -> Term -> Subst -> Subst
-ext = SCons
+ext v t s = Tuple v t : s
 
 data State = State Subst Var
 
@@ -83,12 +74,6 @@ mzero = StrNil
 
 delay :: Goal -> Goal
 delay g st = StrDelay $ \_ -> g st
-
-data Maybe a = Nothing | Just a
-
-instance showMaybe :: (Show a) => Show (Maybe a) where
-  show Nothing = "Nothing"
-  show (Just a) = "Just (" ++ show a ++ ")"
 
 (===) :: Term -> Term -> Goal
 (===) u v st = 
@@ -132,14 +117,14 @@ bind (StrDelay f) g = StrDelay $ \u -> f u `bind` g
 bind (StrCons st s1) g = g st `mplus` (s1 `bind` g)
 
 runOne :: Goal -> Maybe Subst
-runOne g = go $ g (State SNil zero)
+runOne g = go $ g (State [] zero)
   where
   go StrNil = Nothing
   go (StrDelay f) = go (f unit)
   go (StrCons st _) = Just $ stateSubst st
 
 runAll :: Goal -> [Subst]
-runAll g = go $ g (State SNil zero)
+runAll g = go $ g (State [] zero)
   where
   go StrNil = []
   go (StrDelay f) = go (f unit)
