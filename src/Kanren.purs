@@ -11,14 +11,14 @@ import Kanren.Stream
 import Kanren.Goal
 
 runOne :: Goal -> Maybe Subst
-runOne g = go $ g (State [] zero)
+runOne g = go $ runGoal g (State [] zero)
   where
   go StrNil = Nothing
   go (StrDelay f) = go (f unit)
   go (StrCons st _) = Just $ stateSubst st
 
 runAll :: Goal -> [Subst]
-runAll g = go $ g (State [] zero)
+runAll g = go $ runGoal g (State [] zero)
   where
   go StrNil = []
   go (StrDelay f) = go (f unit)

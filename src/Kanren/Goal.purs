@@ -1,10 +1,6 @@
 module Kanren.Goal
-  ( Goal()
-  , delay
-  , (===)
-  , fresh
-  , disj
-  , conj
+  ( Goal(..)
+  , runGoal
   ) where    
     
 import Data.Maybe
@@ -15,31 +11,25 @@ import Kanren.Stream
 import Kanren.Var    
 import Kanren.Unify
     
-type Goal = State -> Stream
+data Goal 
+  = Delay Goal
+  | Unify Term Term
+  | Fresh (Term -> Goal)
+  | Disj Goal Goal
+  | Conj Goal Goal
 
-one :: Goal
-one st = StrCons st mzero
-
-delay :: Goal -> Goal
-delay g st = StrDelay $ \_ -> g st
-
-(===) :: Term -> Term -> Goal
-(===) u v st = 
+runGoal :: Goal -> State -> Stream
+runGoal (Delay g) st = StrDelay $ \_ -> runGoal g st
+runGoal (Unify u v) st = 
   case unify u v $ stateSubst st of
     Nothing -> mzero
-    Just sub -> one $ State sub (stateVar st)
-
-fresh :: (Term -> Goal) -> Goal
-fresh f st =
+    Just sub -> StrCons (State sub (stateVar st)) mzero
+runGoal (Fresh f) st =
   let c = stateVar st
       g = f $ TmVar c
-  in g $ State (stateSubst st) (succ c)
-
-disj :: Goal -> Goal -> Goal
-disj g1 g2 st = g1 st `mplus` g2 st
-
-conj :: Goal -> Goal -> Goal
-conj g1 g2 st = g1 st `bind` g2
+  in runGoal g $ State (stateSubst st) (succ c)
+runGoal (Disj g1 g2) st = runGoal g1 st `mplus` runGoal g2 st
+runGoal (Conj g1 g2) st = runGoal g1 st `bind` g2
 
 mplus :: Stream -> Stream -> Stream
 mplus StrNil s = s
@@ -49,4 +39,4 @@ mplus (StrCons st s1) s2 = StrCons st $ mplus s1 s2
 bind :: Stream -> Goal -> Stream
 bind StrNil _ = mzero
 bind (StrDelay f) g = StrDelay $ \u -> f u `bind` g
-bind (StrCons st s1) g = g st `mplus` (s1 `bind` g)
+bind (StrCons st s1) g = runGoal g st `mplus` (s1 `bind` g)
