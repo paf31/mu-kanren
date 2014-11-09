@@ -16,16 +16,20 @@ example :: State
 example = State goal [] zero Empty
   where
   goal :: Goal
-  goal = Fresh $ \t1 -> Fresh $ \t2 -> 
-    Conj (Unify t1 (TmObj (Obj "a")))
-         (Unify t1 t2)
+  goal = Fresh $ \t1 -> Fresh $ \t2 -> Disj (g1 t1 t2) (g2 t1 t2)
+  
+  g1 t1 t2 = Conj (Unify t1 (TmObj (Obj "a")))
+                  (Unify t1 t2)
+
+  g2 t1 t2 = Conj (Unify t1 (TmObj (Obj "b")))
+                  (Unify t1 t2)
 
 step :: State -> [State]
 step st@(State goal subst var stack) = 
   case goal of
     Done -> 
       case stack of
-        Empty -> [ st ]
+        Empty -> []
 	Push goal' stack' ->
           [ State goal' subst var stack' ]
     Unify u v -> 
