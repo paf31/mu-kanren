@@ -1,0 +1,18 @@
+ul {
+    list-style-type: none;
+}
+
+.goal {
+    border: 1px solid;
+    padding: 5px;
+    background: #f5f5f5;
+    display: inline-block;
+}
+
+li.state {
+    float: left;
+    border: 1px solid;
+    padding: 10px;
+    margin: 10px;
+    background: rgba(0,0,0,0.05);
+}

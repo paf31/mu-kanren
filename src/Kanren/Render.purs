@@ -7,6 +7,7 @@ import Data.Foldable (intercalate)
 import Data.Traversable (for)
 
 import Control.Bind
+import Control.Monad (unless)
 import Control.Monad.Eff
 import Control.Monad.JQuery
 
@@ -21,11 +22,12 @@ render :: forall eff. State -> Eff (dom :: DOM | eff) JQuery
 render st@(State g su _ stack) = do
   li <- create "<li>" >>= addClass "state"
   
-  goal <- create "<pre>" >>= addClass "goal"
-  intercalate "\n" (renderGoal 0 g) `appendText` goal
-  goal `append` li
+  unless (isDone g) $ void do 
+    goal <- create "<pre>" >>= addClass "goal"
+    intercalate "\n" (renderGoal 0 g) `appendText` goal
+    goal `append` li
   
-  for stack $ \g' -> do
+  for stack $ \g' -> unless (isDone g') $ void do 
     stack <- create "<pre>" >>= addClass "stack"
     intercalate "\n" (renderGoal 0 g') `appendText` stack
     create "<hr>" >>= flip append li
@@ -39,10 +41,16 @@ render st@(State g su _ stack) = do
     li `append` subst
   subst `append` li
    
-  a <- create "<a href='#'>More</a>"
-  on "click" expand a
-  a `append` li
-  where    
+  unless (isDone g) $ void do 
+    a <- create "<a href='#'>More</a>"
+    on "click" expand a
+    a `append` li
+    
+  return li
+  where
+      
+  isDone Done = true
+  isDone _    = false          
       
   expand e jq = do
     li <- parent jq
