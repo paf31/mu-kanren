@@ -16,13 +16,7 @@ example :: State
 example = State goal [] zero []
   where
   goal :: Goal
-  goal = Fresh "x" $ Fresh "y" $ Disj g1 g2
-  
-  g1 = Conj (Unify (obj "x") (obj "a"))
-            (Unify (obj "x") (obj "y"))
-
-  g2 = Conj (Unify (obj "x") (obj "b"))
-            (Unify (obj "y") (TmPair (obj "x") (obj "c")))
+  goal = Fresh "xs" $ Fresh "ys" $ Named "appendo" [obj "xs", obj "ys", TmPair (obj "a") (TmPair (obj "b") (TmPair (obj "c") (obj "nil")))]
 
   obj nm = TmObj (Obj nm)
 
@@ -38,7 +32,8 @@ step st@(State goal subst var stack) = unwind <$> go goal
   go (Disj g1 g2) = [ State g1 subst var stack
                     , State g2 subst var stack
                     ]
-  go (Conj g1 g2) = [ State g1 subst var (g2 : stack) ]      
+  go (Conj g1 g2) = [ State g1 subst var (g2 : stack) ]   
+  go (Named name ts) = [ State (builtIn name ts) subst var stack ]
       
   unwind (State Done subst var (goal : stack)) = State goal subst var stack
   unwind other = other     
@@ -51,7 +46,20 @@ step st@(State goal subst var stack) = unwind <$> go goal
     onGoals f@(Fresh nm' g) = if nm == nm' then f else Fresh nm' (onGoals g)
     onGoals (Disj g1 g2) = Disj (onGoals g1) (onGoals g2)
     onGoals (Conj g1 g2) = Conj (onGoals g1) (onGoals g2)
+    onGoals (Named name ts) = Named name (onTerms <$> ts)
 
     onTerms (TmObj (Obj nm')) | nm == nm' = r
     onTerms (TmPair t1 t2) = TmPair (onTerms t1) (onTerms t2)
     onTerms other = other
+    
+  builtIn :: String -> [Term] -> Goal
+  builtIn "appendo" [xs, ys, zs] = 
+    Disj (Conj (Unify xs (obj "nil"))
+               (Unify ys zs))
+         (Fresh "x" $ Fresh "xs'" $ Fresh "res" $ 
+           Conj (Unify xs (TmPair (obj "x") (obj "xs'")))
+                (Conj (Named "appendo" [obj "xs'", ys, obj "res"])
+                      (Unify zs (TmPair (obj "x") (obj "res")))))
+                      
+  obj :: String -> Term
+  obj nm = TmObj (Obj nm)

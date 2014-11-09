@@ -2,6 +2,8 @@ module Kanren.Goal
   ( Goal(..)
   ) where    
     
+import Data.Foldable (intercalate)    
+    
 import Kanren.Term
 import Kanren.Var    
     
@@ -11,6 +13,7 @@ data Goal
   | Fresh String Goal
   | Disj Goal Goal
   | Conj Goal Goal
+  | Named String [Term]
 
 instance showGoal :: Show Goal where
   show Done = "Done"
@@ -29,5 +32,9 @@ instance showGoal :: Show Goal where
   show (Conj g1 g2) = "(Conj" ++ 
     " " ++ show g1 ++
     " " ++ show g2 ++
+    ")"
+  show (Named name ts) = "(" ++ 
+    name ++
+    " " ++ intercalate " " (show <$> ts) ++
     ")"
 
