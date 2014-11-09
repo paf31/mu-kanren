@@ -16,13 +16,15 @@ example :: State
 example = State goal [] zero Empty
   where
   goal :: Goal
-  goal = Fresh $ \t1 -> Fresh $ \t2 -> Disj (g1 t1 t2) (g2 t1 t2)
+  goal = Fresh "x" $ Fresh "y" $ Disj g1 g2
   
-  g1 t1 t2 = Conj (Unify t1 (TmObj (Obj "a")))
-                  (Unify t1 t2)
+  g1 = Conj (Unify (obj "x") (obj "a"))
+            (Unify (obj "x") (obj "y"))
 
-  g2 t1 t2 = Conj (Unify t1 (TmObj (Obj "b")))
-                  (Unify t1 t2)
+  g2 = Conj (Unify (obj "x") (obj "b"))
+            (Unify (obj "x") (obj "y"))
+
+  obj nm = TmObj (Obj nm)
 
 step :: State -> [State]
 step st@(State goal subst var stack) = 
@@ -30,14 +32,14 @@ step st@(State goal subst var stack) =
     Done -> 
       case stack of
         Empty -> []
-	Push goal' stack' ->
+        Push goal' stack' ->
           [ State goal' subst var stack' ]
     Unify u v -> 
       case unify u v subst of
         Nothing -> []
         Just subst' -> [State Done subst' var stack]
-    Fresh f ->
-      [ State (f (TmVar var)) subst (succ var) stack ]
+    Fresh nm g ->
+      [ State (replace nm (TmVar var) g) subst (succ var) stack ]
     Disj g1 g2 ->
       [ State g1 subst var stack
       , State g2 subst var stack
@@ -45,4 +47,16 @@ step st@(State goal subst var stack) =
     Conj g1 g2 ->
       [ State g1 subst var (Push g2 stack) ]
 
+  where
+  replace :: String -> Term -> Goal -> Goal
+  replace nm r = onGoals
+    where
+    onGoals Done = Done
+    onGoals (Unify u v) = Unify (onTerms u) (onTerms v)
+    onGoals f@(Fresh nm' g) = if nm == nm' then f else Fresh nm' (onGoals g)
+    onGoals (Disj g1 g2) = Disj (onGoals g1) (onGoals g2)
+    onGoals (Conj g1 g2) = Conj (onGoals g1) (onGoals g2)
 
+    onTerms (TmObj (Obj nm')) | nm == nm' = r
+    onTerms (TmPair t1 t2) = TmPair (onTerms t1) (onTerms t2)
+    onTerms other = other

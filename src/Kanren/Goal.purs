@@ -8,7 +8,7 @@ import Kanren.Var
 data Goal 
   = Done
   | Unify Term Term
-  | Fresh (Term -> Goal)
+  | Fresh String Goal
   | Disj Goal Goal
   | Conj Goal Goal
 
@@ -18,7 +18,10 @@ instance showGoal :: Show Goal where
     " " ++ show t1 ++
     " " ++ show t2 ++
     ")"
-  show (Fresh _) = "(Fresh ?)"
+  show (Fresh nm g) = "(Fresh" ++
+    " " ++ show nm ++
+    " " ++ show g ++
+    ")"
   show (Disj g1 g2) = "(Disj" ++ 
     " " ++ show g1 ++
     " " ++ show g2 ++
