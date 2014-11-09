@@ -63,7 +63,7 @@ render st@(State g su _ stack) = do
     
   renderGoal :: Number -> Goal -> [String]
   renderGoal _ Done = []
-  renderGoal n (Fresh nm g) = (spaces n ++ "fresh " ++ nm) : renderGoal n g
+  renderGoal n (Fresh nm g) = (spaces n ++ "fresh " ++ nm) : renderGoal (n + 1) g
   renderGoal n (Unify u v) = [spaces n ++ renderTerm u ++ " == " ++ renderTerm v]
   renderGoal n (Disj g1 g2) = (spaces n ++ "disj") : renderGoal (n + 1) g1 ++ renderGoal (n + 1) g2
   renderGoal n (Conj g1 g2) = (spaces n ++ "conj") : renderGoal (n + 1) g1 ++ renderGoal (n + 1) g2

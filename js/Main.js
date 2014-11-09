@@ -1028,7 +1028,7 @@ PS.Kanren_Render = (function () {
                     return [  ];
                 };
                 if (_313 instanceof Kanren_Goal.Fresh) {
-                    return Prelude[":"](spaces(_312) + ("fresh " + _313.value0))(renderGoal(_312)(_313.value1));
+                    return Prelude[":"](spaces(_312) + ("fresh " + _313.value0))(renderGoal(_312 + 1)(_313.value1));
                 };
                 if (_313 instanceof Kanren_Goal.Unify) {
                     return [ spaces(_312) + (renderTerm(_313.value0) + (" == " + renderTerm(_313.value1))) ];
