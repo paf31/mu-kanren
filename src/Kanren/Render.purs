@@ -10,14 +10,17 @@ import Control.Monad.JQuery
 
 import Kanren.Eval
 import Kanren.State
+import Kanren.Goal
 
 render :: forall eff. State -> Eff (dom :: DOM | eff) JQuery 
+render st@(State Done _ _ _) = create "<li>" >>= appendText (show st)
 render st = do
   a <- create "<a href='#'>"
   appendText (show st) a
   on "click" expand a
   create "<li>" >>= append a
-  where
+  where    
+      
   expand e jq = do
     li <- parent jq
     ul <- create "<ul>"

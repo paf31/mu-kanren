@@ -27,27 +27,22 @@ example = State goal [] zero Empty
   obj nm = TmObj (Obj nm)
 
 step :: State -> [State]
-step st@(State goal subst var stack) = 
-  case goal of
-    Done -> 
-      case stack of
-        Empty -> []
-        Push goal' stack' ->
-          [ State goal' subst var stack' ]
-    Unify u v -> 
-      case unify u v subst of
-        Nothing -> []
-        Just subst' -> [State Done subst' var stack]
-    Fresh nm g ->
-      [ State (replace nm (TmVar var) g) subst (succ var) stack ]
-    Disj g1 g2 ->
-      [ State g1 subst var stack
-      , State g2 subst var stack
-      ]
-    Conj g1 g2 ->
-      [ State g1 subst var (Push g2 stack) ]
-
+step st@(State goal subst var stack) = unwind <$> go goal
   where
+  go Done = []
+  go (Unify u v) = 
+    case unify u v subst of
+      Nothing -> []
+      Just subst' -> [State Done subst' var stack]
+  go (Fresh nm g) = [ State (replace nm (TmVar var) g) subst (succ var) stack ]
+  go (Disj g1 g2) = [ State g1 subst var stack
+                    , State g2 subst var stack
+                    ]
+  go (Conj g1 g2) = [ State g1 subst var (Push g2 stack) ]      
+      
+  unwind (State Done subst var (Push goal stack)) = State goal subst var stack
+  unwind other = other     
+      
   replace :: String -> Term -> Goal -> Goal
   replace nm r = onGoals
     where
