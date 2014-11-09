@@ -2,6 +2,8 @@ module Kanren.Render where
 
 import DOM
 
+import Data.Tuple
+import Data.Foldable (intercalate)
 import Data.Traversable (for)
 
 import Control.Bind
@@ -16,12 +18,27 @@ import Kanren.Var
 import Kanren.Obj
 
 render :: forall eff. State -> Eff (dom :: DOM | eff) JQuery 
-render st@(State Done _ _ _) = create "<li>" >>= appendText (show st)
-render st@(State g _ _ _) = do
-  li <- create "<li>"
-  for (renderGoal 0 g) $ \s -> do
-    div <- create "<div>" >>= appendText s
-    div `append` li
+render st@(State g su _ stack) = do
+  li <- create "<li>" >>= addClass "state"
+  
+  goal <- create "<pre>" >>= addClass "goal"
+  intercalate "\n" (renderGoal 0 g) `appendText` goal
+  goal `append` li
+  
+  for stack $ \g' -> do
+    stack <- create "<pre>" >>= addClass "stack"
+    intercalate "\n" (renderGoal 0 g') `appendText` stack
+    create "<hr>" >>= flip append li
+    stack `append` li
+  
+  subst <- create "<ul>" >>= addClass "subst"
+  for su $ \(Tuple (Var nm) tm) -> do
+    li <- create "<li>"
+    let text = "#" ++ show nm ++ " = " ++ renderTerm tm
+    text `appendText` li
+    li `append` subst
+  subst `append` li
+   
   a <- create "<a href='#'>More</a>"
   on "click" expand a
   a `append` li
@@ -37,7 +54,8 @@ render st@(State g _ _ _) = do
     ul `append` li
     
   renderGoal :: Number -> Goal -> [String]
-  renderGoal n (Fresh nm g) = (spaces n ++ "fresh " ++ nm ++ "\n") : renderGoal n g
+  renderGoal _ Done = []
+  renderGoal n (Fresh nm g) = (spaces n ++ "fresh " ++ nm) : renderGoal n g
   renderGoal n (Unify u v) = [spaces n ++ renderTerm u ++ " == " ++ renderTerm v]
   renderGoal n (Disj g1 g2) = (spaces n ++ "disj") : renderGoal (n + 1) g1 ++ renderGoal (n + 1) g2
   renderGoal n (Conj g1 g2) = (spaces n ++ "conj") : renderGoal (n + 1) g1 ++ renderGoal (n + 1) g2

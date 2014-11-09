@@ -13,7 +13,7 @@ import Kanren.Goal
 import Kanren.Unify
 
 example :: State
-example = State goal [] zero Empty
+example = State goal [] zero []
   where
   goal :: Goal
   goal = Fresh "x" $ Fresh "y" $ Disj g1 g2
@@ -22,7 +22,7 @@ example = State goal [] zero Empty
             (Unify (obj "x") (obj "y"))
 
   g2 = Conj (Unify (obj "x") (obj "b"))
-            (Unify (obj "x") (obj "y"))
+            (Unify (obj "y") (TmPair (obj "x") (obj "c")))
 
   obj nm = TmObj (Obj nm)
 
@@ -38,9 +38,9 @@ step st@(State goal subst var stack) = unwind <$> go goal
   go (Disj g1 g2) = [ State g1 subst var stack
                     , State g2 subst var stack
                     ]
-  go (Conj g1 g2) = [ State g1 subst var (Push g2 stack) ]      
+  go (Conj g1 g2) = [ State g1 subst var (g2 : stack) ]      
       
-  unwind (State Done subst var (Push goal stack)) = State goal subst var stack
+  unwind (State Done subst var (goal : stack)) = State goal subst var stack
   unwind other = other     
       
   replace :: String -> Term -> Goal -> Goal

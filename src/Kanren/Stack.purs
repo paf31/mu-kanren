@@ -1,12 +1,8 @@
 module Kanren.Stack where
 
+import Data.Monoid
+import Data.Foldable
+
 import Kanren.Goal
 
-data Stack = Empty | Push Goal Stack
-
-instance showStack :: Show Stack where
-  show Empty = "Empty"
-  show (Push g s) = "(Push" ++
-    " " ++ show g ++
-    " " ++ show s ++
-    ")"
+type Stack = [Goal]
