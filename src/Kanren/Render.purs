@@ -62,9 +62,9 @@ render st@(State g su var stk) = void do
   renderShortGoal Done = "Done"
   renderShortGoal (Fresh ns _) = "fresh " ++ intercalate " " ns
   renderShortGoal (Unify u v) = renderTerm u ++ " == " ++ renderTerm v
-  renderShortGoal (Disj g1 g2) = "disj"
-  renderShortGoal (Conj g1 g2) = "conj"
-  renderShortGoal (Named name ts) = name
+  renderShortGoal (Disj _) = "disj"
+  renderShortGoal (Conj _) = "conj"
+  renderShortGoal (Named name _) = name
     
   renderGoal :: forall eff. Boolean -> JQuery -> Goal -> Eff (dom :: DOM | eff) Unit 
   renderGoal _           jq Done = void do
@@ -98,36 +98,26 @@ render st@(State g su var stk) = void do
               >>= appendText text
     line <- newLine >>= append link
     line `append` jq
-  renderGoal renderLinks jq (Disj g1 g2) = void do
+  renderGoal renderLinks jq (Disj gs) = void do
     line <- newLine >>= appendText "disj"
     line `append` jq
     
-    i1 <- indented
-    a1 <- linkTo renderLinks (render (unwind (State g1 su var stk))) 
-    renderGoal false a1 g1
-    a1 `append` i1
-    i1 `append` jq
-    
-    i2 <- indented
-    a2 <- linkTo renderLinks (render (unwind (State g2 su var stk)))
-    renderGoal false a2 g2
-    a2 `append` i2
-    i2 `append` jq
-  renderGoal renderLinks jq (Conj g1 g2) = void do
+    for gs $ \g -> do
+      i <- indented
+      a <- linkTo renderLinks (render (unwind (State g su var stk))) 
+      renderGoal false a g
+      a `append` i
+      i `append` jq
+  renderGoal renderLinks jq (Conj gs) = void do
     line <- newLine >>= appendText "conj"
     line `append` jq
     
-    i1 <- indented
-    a1 <- linkTo renderLinks (render (unwind (State g1 su var (g2 : stk)))) 
-    renderGoal false a1 g1
-    a1 `append` i1
-    i1 `append` jq
-    
-    i2 <- indented
-    a2 <- linkTo renderLinks (render (unwind (State g2 su var (g1 : stk)))) 
-    renderGoal false a2 g2
-    a2 `append` i2
-    i2 `append` jq
+    for (inContext gs) $ \(Tuple g rest) -> do
+      i <- indented
+      a <- linkTo renderLinks (render (unwind (State g su var (rest ++ stk)))) 
+      renderGoal false a g
+      a `append` i
+      i `append` jq
   
   unwind :: State -> State
   unwind (State Done subst var (goal : stack)) = State goal subst var stack
@@ -155,3 +145,9 @@ render st@(State g su var stk) = void do
     where
     go acc 0 = acc
     go acc n = go (acc ++ "  ") (n - 1)
+    
+  inContext :: forall a. [a] -> [Tuple a [a]]
+  inContext = go [] []
+    where
+    go acc _  []       = acc
+    go acc ys (x : xs) = go (Tuple x (ys ++ xs) : acc) (ys ++ [x]) xs

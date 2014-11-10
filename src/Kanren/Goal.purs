@@ -12,8 +12,8 @@ data Goal
   | Fail
   | Unify Term Term
   | Fresh [String] Goal
-  | Disj Goal Goal
-  | Conj Goal Goal
+  | Disj [Goal]
+  | Conj [Goal]
   | Named String [Term]
 
 instance showGoal :: Show Goal where
@@ -27,13 +27,11 @@ instance showGoal :: Show Goal where
     " " ++ intercalate " " nms ++
     " " ++ show g ++
     ")"
-  show (Disj g1 g2) = "(Disj" ++ 
-    " " ++ show g1 ++
-    " " ++ show g2 ++
+  show (Disj gs) = "(Disj" ++ 
+    " " ++ intercalate " " (show <$> gs) ++
     ")"
-  show (Conj g1 g2) = "(Conj" ++ 
-    " " ++ show g1 ++
-    " " ++ show g2 ++
+  show (Conj gs) = "(Conj" ++ 
+    " " ++ intercalate " " (show <$> gs) ++
     ")"
   show (Named name ts) = "(" ++ 
     name ++

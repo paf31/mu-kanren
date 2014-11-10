@@ -17,9 +17,11 @@ example :: State
 example = State goal [] zero []
   where
   goal :: Goal
-  goal = Fresh ["xs", "ys"] $ Named "appendo" [obj "xs", obj "ys", TmPair (obj "a") (TmPair (obj "b") (TmPair (obj "c") (obj "nil")))]
-
-  obj nm = TmObj (Obj nm)   
+  goal = Fresh ["xs", "ys"] $ 
+           Named "appendo" [ obj "xs"
+                           , obj "ys"
+                           , TmPair (obj "a") (TmPair (obj "b") (TmPair (obj "c") (obj "nil")))
+                           ] 
       
 replace :: String -> Term -> Goal -> Goal
 replace nm r = onGoals
@@ -27,8 +29,8 @@ replace nm r = onGoals
   onGoals Done = Done
   onGoals (Unify u v) = Unify (onTerms u) (onTerms v)
   onGoals f@(Fresh ns g) = if nm `elem` ns then f else Fresh ns (onGoals g)
-  onGoals (Disj g1 g2) = Disj (onGoals g1) (onGoals g2)
-  onGoals (Conj g1 g2) = Conj (onGoals g1) (onGoals g2)
+  onGoals (Disj gs) = Disj (onGoals <$> gs)
+  onGoals (Conj gs) = Conj (onGoals <$> gs)
   onGoals (Named name ts) = Named name (onTerms <$> ts)
 
   onTerms (TmObj (Obj nm')) | nm == nm' = r
@@ -40,13 +42,13 @@ replaceAll = foldl (\f (Tuple nm r) g -> replace nm r (f g)) id
   
 builtIn :: String -> [Term] -> Goal
 builtIn "appendo" [xs, ys, zs] = 
-  Disj (Conj (Unify xs (obj "nil"))
-             (Unify ys zs))
-       (Fresh ["x", "xs'", "res"] $ 
-         Conj (Unify xs (TmPair (obj "x") (obj "xs'")))
-              (Conj (Named "appendo" [obj "xs'", ys, obj "res"])
-                    (Unify zs (TmPair (obj "x") (obj "res")))))
+  Disj [ Conj [ Unify xs (obj "nil")
+              , Unify ys zs
+              ]
+       , Fresh ["x", "xs'", "res"] $ 
+           Conj [ Unify xs (TmPair (obj "x") (obj "xs'"))
+                , Named "appendo" [obj "xs'", ys, obj "res"]
+                , Unify zs (TmPair (obj "x") (obj "res"))
+                ]
+       ]
                     
-  where 
-  obj :: String -> Term
-  obj nm = TmObj (Obj nm)
