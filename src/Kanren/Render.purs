@@ -4,6 +4,7 @@ import DOM
 
 import Data.Maybe
 import Data.Tuple
+import Data.Array (sortBy)
 import Data.Foldable (intercalate)
 import Data.Traversable (for)
 
@@ -48,7 +49,7 @@ render st@(State g su var stk) = void do
   select "#subst ul" >>= remove
   subst <- create "<ul>"
   
-  for su $ \(Tuple (Var nm) tm) -> do
+  for (sortBy (compare `Data.Function.on` fst) su) $ \(Tuple (Var nm) tm) -> do
     let text = "#" ++ show nm ++ " = " ++ renderTerm tm
     pre <- create "<pre>" >>= appendText text
     li <- create "<li>" >>= append pre
