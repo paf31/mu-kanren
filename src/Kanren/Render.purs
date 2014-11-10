@@ -49,9 +49,9 @@ render st@(State g su var stk) = void do
   subst <- create "<ul>"
   
   for su $ \(Tuple (Var nm) tm) -> do
-    li <- create "<li>"
     let text = "#" ++ show nm ++ " = " ++ renderTerm tm
-    text `appendText` li
+    pre <- create "<pre>" >>= appendText text
+    li <- create "<li>" >>= append pre
     li `append` subst
     
   select "#subst .with-margin" >>= append subst
