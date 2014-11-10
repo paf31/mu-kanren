@@ -11,7 +11,7 @@ data Goal
   = Done
   | Fail
   | Unify Term Term
-  | Fresh String Goal
+  | Fresh [String] Goal
   | Disj Goal Goal
   | Conj Goal Goal
   | Named String [Term]
@@ -23,8 +23,8 @@ instance showGoal :: Show Goal where
     " " ++ show t1 ++
     " " ++ show t2 ++
     ")"
-  show (Fresh nm g) = "(Fresh" ++
-    " " ++ show nm ++
+  show (Fresh nms g) = "(Fresh" ++
+    " " ++ intercalate " " nms ++
     " " ++ show g ++
     ")"
   show (Disj g1 g2) = "(Disj" ++ 

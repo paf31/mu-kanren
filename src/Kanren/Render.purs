@@ -4,7 +4,7 @@ import DOM
 
 import Data.Maybe
 import Data.Tuple
-import Data.Array (sortBy)
+import Data.Array (length, sortBy, (..))
 import Data.Foldable (intercalate)
 import Data.Traversable (for)
 
@@ -60,7 +60,7 @@ render st@(State g su var stk) = void do
       
   renderShortGoal :: Goal -> String
   renderShortGoal Done = "Done"
-  renderShortGoal (Fresh nm _) = "fresh " ++ nm
+  renderShortGoal (Fresh ns _) = "fresh " ++ intercalate " " ns
   renderShortGoal (Unify u v) = renderTerm u ++ " == " ++ renderTerm v
   renderShortGoal (Disj g1 g2) = "disj"
   renderShortGoal (Conj g1 g2) = "conj"
@@ -71,10 +71,12 @@ render st@(State g su var stk) = void do
     "Evaluation complete" `appendText` jq
   renderGoal _           jq Fail = void do
     "Contradiction!" `appendText` jq
-  renderGoal renderLinks jq (Fresh nm g) = void do
-    let newState = State (replace nm (TmVar var) g) su (succ var) stk
+  renderGoal renderLinks jq (Fresh ns g) = void do
+    let freshNames = TmVar <<< Var <$> (runVar var .. (runVar var + length ns - 1))
+        newState = State (replaceAll (zip ns freshNames) g) su nextVar stk
+        nextVar = Var (runVar var + length ns)
     link <- linkTo renderLinks (render newState)
-              >>= appendText ("fresh " ++ nm)
+              >>= appendText ("fresh " ++ intercalate " " ns ++ ".")
     line <- newLine >>= append link
     line `append` jq
     rest <- indented

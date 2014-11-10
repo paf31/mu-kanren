@@ -2,6 +2,9 @@ module Kanren.Var where
 
 newtype Var = Var Number
 
+runVar :: Var -> Number
+runVar (Var v) = v
+
 instance eqVar :: Eq Var where
   (==) (Var v1) (Var v2) = v1 == v2
   (/=) (Var v1) (Var v2) = v1 /= v2
