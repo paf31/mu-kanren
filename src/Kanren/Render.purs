@@ -25,7 +25,7 @@ render :: forall eff. State -> Eff (dom :: DOM | eff) Unit
 render st@(State g su var stk) = void do
   -- Update the goal    
     
-  select "#goal .lines" >>= remove    
+  select "#goal .with-margin .lines" >>= remove    
     
   goal <- create "<div>" >>= addClass "lines"
   renderGoal true goal g

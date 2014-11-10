@@ -8,7 +8,6 @@ import Kanren.Term
 import Kanren.Subst
 import Kanren.State
 import Kanren.Stack
-import Kanren.Stream
 import Kanren.Goal
 import Kanren.Unify
 

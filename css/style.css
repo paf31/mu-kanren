@@ -13,36 +13,6 @@ h1, h2, h3 {
   
 }
 
-#goal {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 25%; 
-  width: 50%; 
-}
-
-#subst {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 25%;
-  height: 50%;
-  overflow: scroll;
-  background: #f5f5f5;
-  border-left: 2px solid #a0a0a0;
-}
-
-#stack {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 25%;
-  height: 50%;
-  overflow: scroll;
-  background: #f5f5f5;
-  border-left: 2px solid #a0a0a0;
-}
-
 #info {
   position: absolute;
   top: 0;
@@ -53,6 +23,33 @@ h1, h2, h3 {
   background: #f5f5f5;
   border-right: 2px solid #a0a0a0;
   box-shadow: 0 0 5px #a0a0a0;
+}
+
+#goal {
+  position: absolute;
+  top: 0;
+  left: 25%; 
+  width: 75%; 
+  height: 33%;
+  overflow: scroll;
+}
+
+#subst {
+  position: absolute;
+  top: 33%;
+  left: 25%; 
+  width: 75%;
+  height: 33%;
+  overflow: scroll;
+}
+
+#stack {
+  position: absolute;
+  top: 66%;
+  left: 25%; 
+  width: 75%;
+  height: 34%;
+  overflow: scroll;
 }
 
 .with-margin {
