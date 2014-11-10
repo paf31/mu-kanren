@@ -1,6 +1,6 @@
 body {
     
-    font-family: 'Roboto', Sans-Serif;
+    font-family: 'Lato', Sans-Serif;
 }
 
 h1, h2, h3 {
@@ -18,7 +18,7 @@ h1, h2, h3 {
   top: 0;
   bottom: 0;
   left: 25%; 
-  width: 75%; 
+  width: 50%; 
   background: #f5f5f5;
   border-right: 2px solid #a0a0a0;
   box-shadow: 0 0 5px #a0a0a0;
@@ -39,6 +39,15 @@ h1, h2, h3 {
   left: 0;
   width: 25%;
   height: 50%;
+  overflow: scroll;
+}
+
+#info {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 25%;
   overflow: scroll;
 }
 

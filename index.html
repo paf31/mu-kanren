@@ -12,7 +12,7 @@
     </script> 
 
     <link rel="stylesheet" href="css/style.css" /> 
-    <link rel="stylesheet" href="css/roboto.css" />
+    <link rel="stylesheet" href="css/lato.css" />
   </head>
   <body>
     <div id="wrapper">
@@ -32,6 +32,25 @@
 	      <h3>Remaining Goals</h3>
           <ul>
           </ul>
+        </div>
+      </div>
+      <div id="info">
+        <div class="with-margin">
+	      <h3>Instructions</h3>
+          
+          <p>This application is a step-by-step evaluator for a dialect of <a href="https://github.com/jasonhemann/microKanren">microKanren</a>.</p>
+          
+          <h4>Goals</h4>
+          
+          <p>The central pane shows the current goal. Highlighted areas of the goal text can be clicked to evaluate the next step.</p>
+          <p>Some goals can be evaluated in only one way, and some goals can be evaluated in multiple (or zero) ways.</p>
+          <p>For example, at a disjunction or a conjunction, either of the two subgoals can be evaluated.</p>
+          <p>At a conjunction, one subgoal is evaluated first, and the other subgoal is added to the list of <em>remaining goals</em>, displayed in the bottom left pane. When evaluation completes, the first remaining goal will be evaluated. When there are no more remaining goals, evaluation is complete for the original goal.</p>
+          
+          <h4>Substitutions</h4>
+          
+          <p>The current substitution is shown in the top left pane. As goals are evaluated, the substitution will grow, until a solution is found or a contradiction is met.</p>
+          <p>The substitution grows when two terms are <em>unified</em>.</p>
         </div>
       </div>
     </div>
