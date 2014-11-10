@@ -631,6 +631,10 @@ PS.Kanren_Goal = (function () {
 
     };
     Done.value = new Done();
+    function Fail() {
+
+    };
+    Fail.value = new Fail();
     function Unify(value0, value1) {
         this.value0 = value0;
         this.value1 = value1;
@@ -680,6 +684,7 @@ PS.Kanren_Goal = (function () {
         Conj: Conj, 
         Disj: Disj, 
         Done: Done, 
+        Fail: Fail, 
         Fresh: Fresh, 
         Named: Named, 
         Unify: Unify
@@ -1018,7 +1023,10 @@ PS.Kanren_Render = (function () {
             return function (_323) {
                 return function (_324) {
                     if (_324 instanceof Kanren_Goal.Done) {
-                        return Prelude["return"](Control_Monad_Eff.monadEff)(Prelude.unit);
+                        return Prelude["void"](Control_Monad_Eff.functorEff)(Control_Monad_JQuery.appendText("Evaluation complete")(_323));
+                    };
+                    if (_324 instanceof Kanren_Goal.Fail) {
+                        return Prelude["void"](Control_Monad_Eff.functorEff)(Control_Monad_JQuery.appendText("Contradiction!")(_323));
                     };
                     if (_324 instanceof Kanren_Goal.Fresh) {
                         return Prelude["void"](Control_Monad_Eff.functorEff)((function () {
@@ -1039,7 +1047,7 @@ PS.Kanren_Render = (function () {
                             var action = (function () {
                                 var _439 = Kanren_Unify.unify(_324.value0)(_324.value1)(_320.value1);
                                 if (_439 instanceof Data_Maybe.Nothing) {
-                                    return Prelude["return"](Control_Monad_Eff.monadEff)(Prelude.unit);
+                                    return render(new Kanren_State.State(Kanren_Goal.Fail.value, _320.value1, _320.value2, _320.value3));
                                 };
                                 if (_439 instanceof Data_Maybe.Just) {
                                     return render(unwind(new Kanren_State.State(Kanren_Goal.Done.value, _439.value0, _320.value2, _320.value3)));
@@ -1096,7 +1104,7 @@ PS.Kanren_Render = (function () {
                             return Control_Monad_JQuery.append(_18)(_323)();
                         });
                     };
-                    return Prelude["return"](Control_Monad_Eff.monadEff)(Prelude.unit);
+                    throw new Error("Failed pattern match");
                 };
             };
         };

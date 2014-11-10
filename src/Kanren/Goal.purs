@@ -9,6 +9,7 @@ import Kanren.Var
     
 data Goal 
   = Done
+  | Fail
   | Unify Term Term
   | Fresh String Goal
   | Disj Goal Goal
@@ -17,6 +18,7 @@ data Goal
 
 instance showGoal :: Show Goal where
   show Done = "Done"
+  show Fail = "Fail"
   show (Unify t1 t2) = "(Unify" ++
     " " ++ show t1 ++
     " " ++ show t2 ++

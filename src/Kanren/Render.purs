@@ -66,7 +66,10 @@ render st@(State g su var stk) = void do
   renderShortGoal (Named name ts) = name
     
   renderGoal :: forall eff. Boolean -> JQuery -> Goal -> Eff (dom :: DOM | eff) Unit 
-  renderGoal _           _  Done = return unit
+  renderGoal _           jq Done = void do
+    "Evaluation complete" `appendText` jq
+  renderGoal _           jq Fail = void do
+    "Contradiction!" `appendText` jq
   renderGoal renderLinks jq (Fresh nm g) = void do
     let newState = State (replace nm (TmVar var) g) su (succ var) stk
     link <- linkTo renderLinks (render newState)
@@ -79,7 +82,7 @@ render st@(State g su var stk) = void do
   renderGoal renderLinks jq (Unify u v) = void do
     let text = renderTerm u ++ " == " ++ renderTerm v
         action = case unify u v su of
-          Nothing -> return unit
+          Nothing -> render $ State Fail su var stk
           Just su' -> render $ unwind $ State Done su' var stk
     link <- linkTo renderLinks action 
               >>= appendText text
@@ -122,7 +125,6 @@ render st@(State g su var stk) = void do
     renderGoal false a2 g2
     a2 `append` i2
     i2 `append` jq
-  renderGoal _           _  _ = return unit
   
   unwind :: State -> State
   unwind (State Done subst var (goal : stack)) = State goal subst var stack
