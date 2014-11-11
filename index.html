@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
     <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/Main.js"></script>
     <script type="text/javascript">
       $(function() {
@@ -22,18 +23,10 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-xs-4">
-          <div id="info" class="well">
-  	        <h3>Instructions</h3>
-            
-            <p>This application is a step-by-step evaluator for a dialect of <a href="https://github.com/jasonhemann/microKanren">microKanren</a>.</p>
-            
-            <h4>Goals</h4>
-            
-            <p>The current goal is shown on the right. Highlighted areas of the goal text can be clicked to evaluate the next step.</p>
-            <p>Some goals can be evaluated in only one way, and some goals can be evaluated in multiple (or zero) ways.</p>
-            <p>For example, at a disjunction or a conjunction, either of the two subgoals can be evaluated.</p>
-            
-          </div>
+          <h2>mu-kanren</h2>
+          
+          <p>A step-by-step evaluator for a dialect of <a href="https://github.com/jasonhemann/microKanren">microKanren</a>.</p>
+             
           <div id="subst" class="panel panel-default">
             <div class="panel-heading">Substitution</div>
             <div class="panel-body">
@@ -69,14 +62,58 @@
         </div>
         <div class="col-xs-8">
           <ul class="nav nav-pills">
-            <li role="presentation"><a href="#"><span class="fa fa-edit"></span> Edit</a></li>
-            <li role="presentation"><a href="#"><span class="fa fa-undo"></span> Reset</a></a></li>
-            <li role="presentation"><a href="#"><span class="fa fa-question"></span> Help</a></a></li>
+            <li role="presentation">
+              <a href="#"><span class="fa fa-edit"></span> Edit</a>
+            </li>
+            <li role="presentation">
+              <a href="#"><span class="fa fa-undo"></span> Reset</a></a>
+            </li>
+            <li role="presentation">
+              <a href="#" data-toggle="modal" data-target="#help">
+                <span class="fa fa-question"></span> Help
+              </a>
+            </li>
           </ul>    
             
           <div id="goal">
 	        <h3>Current Goal</h3>
             <div class="lines"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="help" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title">Help</h4>
+          </div>
+          <div class="modal-body">
+            <h4>Terms</h4>
+            
+            <p>The language consists of three types of terms:</p>
+            
+            <ul>
+              <li>Symbols, such as <code>a</code>, <code>b</code>, <code>c</code>, and <code>nil</code>.</li>
+              <li>Pairs, such as <code>(a b)</code>.</li>
+            </ul>
+            
+            <p>Pairs can be nested to generate more interesting terms, such as <code>(a (b (c nil)))</code>.</p>
+            
+            <p>During evaluation, terms may also contain <em>unknowns</em>, indicated by a hash symbol: <code>#1</code>, <code>#2</code>, etc.</p>
+            
+            <h4>Goals</h4>
+            
+            <p>The current goal is shown on the right. Highlighted areas of the goal text can be clicked to evaluate the next step.</p>
+            
+            <p>Some goals can be evaluated in only one way, and some goals can be evaluated in multiple (or zero) ways.</p>
+            
+            <p>For example, at a disjunction or a conjunction, either of the two subgoals can be evaluated.</p>
+          </div>
+          <div class="modal-footer">
+            <a type="button" class="btn btn-default" data-dismiss="modal">Close</a>
           </div>
         </div>
       </div>
