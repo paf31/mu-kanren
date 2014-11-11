@@ -76,14 +76,16 @@ render st@(State g su var stk) = void do
         newState = State (replaceAll (zip ns freshNames) g) su nextVar stk
         nextVar = Var (runVar var + length ns)
     link <- linkTo renderLinks (render newState)
-              >>= appendText ("fresh " ++ intercalate " " ns ++ ".")
+              >>= appendText ("(fresh " ++ intercalate " " ns ++ "")
     line <- newLine >>= append link
     line `append` jq
     rest <- indented
     renderGoal false rest g
     rest `append` jq
+    close <- newLine >>= appendText ")"
+    close `append` jq
   renderGoal renderLinks jq (Unify u v) = void do
-    let text = renderTerm u ++ " == " ++ renderTerm v
+    let text = "(= " ++ renderTerm u ++ " " ++ renderTerm v ++ ")"
         action = case unify u v su of
           Nothing -> render $ State Fail su var stk
           Just su' -> render $ unwind $ State Done su' var stk
@@ -92,14 +94,14 @@ render st@(State g su var stk) = void do
     line <- newLine >>= append link
     line `append` jq
   renderGoal renderLinks jq (Named nm ts) = void do
-    let text = nm ++ " " ++ intercalate " " (renderTerm <$> ts)
+    let text = "(" ++ nm ++ " " ++ intercalate " " (renderTerm <$> ts) ++ ")"
         newState = State (builtIn nm ts) su var stk
     link <- linkTo renderLinks (render newState) 
               >>= appendText text
     line <- newLine >>= append link
     line `append` jq
   renderGoal renderLinks jq (Disj gs) = void do
-    line <- newLine >>= appendText "disj"
+    line <- newLine >>= appendText "(disj"
     line `append` jq
     
     for gs $ \g -> do
@@ -108,8 +110,11 @@ render st@(State g su var stk) = void do
       renderGoal false a g
       a `append` i
       i `append` jq
+    
+    close <- newLine >>= appendText ")"
+    close `append` jq
   renderGoal renderLinks jq (Conj gs) = void do
-    line <- newLine >>= appendText "conj"
+    line <- newLine >>= appendText "(conj"
     line `append` jq
     
     for (inContext gs) $ \(Tuple g rest) -> do
@@ -118,6 +123,9 @@ render st@(State g su var stk) = void do
       renderGoal false a g
       a `append` i
       i `append` jq
+      
+    close <- newLine >>= appendText ")"
+    close `append` jq
   
   unwind :: State -> State
   unwind (State Done subst var (goal : stack)) = State goal subst var stack
@@ -139,7 +147,7 @@ render st@(State g su var stk) = void do
   renderTerm :: Term -> String
   renderTerm (TmVar (Var v)) = "#" ++ show v
   renderTerm (TmObj (Obj o)) = o
-  renderTerm (TmPair t1 t2) = "(" ++ renderTerm t1 ++ ", " ++ renderTerm t2 ++ ")"
+  renderTerm (TmPair t1 t2) = "(" ++ renderTerm t1 ++ " " ++ renderTerm t2 ++ ")"
     
   spaces = go ""
     where
