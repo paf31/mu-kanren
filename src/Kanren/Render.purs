@@ -27,36 +27,39 @@ render :: forall eff. State -> Eff (dom :: DOM | eff) Unit
 render st@(State g su var stk) = void do
   -- Update the goal    
     
-  select "#goal .with-margin .lines" >>= remove    
+  select "#goal .lines" >>= remove    
     
   goal <- create "<div>" >>= addClass "lines"
   renderGoal true goal g
-  select "#goal .with-margin" >>= append goal
+  select "#goal" >>= append goal
     
   -- Update the stack    
     
-  select "#stack ul" >>= remove
-  stack <- create "<ul>"
+  select "#stack tbody tr" >>= remove
+  stackBody <- select "#stack tbody"
   
   for stk $ \g' -> void do 
+    tr <- create "<tr>"
+    td <- create "<td>"
     pre <- create "<pre>" >>= appendText (renderShortGoal g')
-    li <- create "<li>" >>= append pre
-    li `append` stack
-    
-  select "#stack .with-margin" >>= append stack
+    pre `append` td
+    td `append` tr
+    tr `append` stackBody
   
   -- Update the substitution
   
-  select "#subst ul" >>= remove
-  subst <- create "<ul>"
+  select "#subst tbody tr" >>= remove
+  
+  substBody <- select "#subst tbody"
   
   for (sortBy (compare `Data.Function.on` fst) su) $ \(Tuple (Var nm) tm) -> do
-    let text = "#" ++ show nm ++ " = " ++ renderTerm (walk su tm)
-    pre <- create "<pre>" >>= appendText text
-    li <- create "<li>" >>= append pre
-    li `append` subst
-    
-  select "#subst .with-margin" >>= append subst
+    tr <- create "<tr>"
+    td1 <- create "<td>" >>= appendText ("#" ++ show nm)
+    pre <- create "<pre>" >>= appendText (renderTerm (walk su tm))
+    td2 <- create "<td>" >>= append pre
+    td1 `append` tr
+    td2 `append` tr
+    tr `append` substBody
   where
       
   renderShortGoal :: Goal -> String

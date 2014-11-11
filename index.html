@@ -3,6 +3,8 @@
   <head>
     <title>MicroKanren Evaluator</title>
 
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/Main.js"></script>
     <script type="text/javascript">
@@ -11,48 +13,64 @@
       });
     </script> 
 
-    <link rel="stylesheet" href="css/style.css" /> 
-    <link rel="stylesheet" href="css/lato.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css" />
   </head>
   <body>
-    <div id="wrapper">
-      <div id="goal">
-        <div class="with-margin">
-	      <h3>Current Goal</h3>
-          <div class="lines"></div>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-xs-4">
+          <div id="info" class="well">
+  	        <h3>Instructions</h3>
+            
+            <p>This application is a step-by-step evaluator for a dialect of <a href="https://github.com/jasonhemann/microKanren">microKanren</a>.</p>
+            
+            <h4>Goals</h4>
+            
+            <p>The current goal is shown on the right. Highlighted areas of the goal text can be clicked to evaluate the next step.</p>
+            <p>Some goals can be evaluated in only one way, and some goals can be evaluated in multiple (or zero) ways.</p>
+            <p>For example, at a disjunction or a conjunction, either of the two subgoals can be evaluated.</p>
+            
+          </div>
+          <div id="subst" class="panel panel-default">
+            <div class="panel-heading">Substitution</div>
+            <div class="panel-body">
+              <p>As goals are evaluated, the substitution will grow, until a solution is found or a contradiction is met.</p>
+              <p>The substitution grows when two terms are <em>unified</em>.</p>
+            </div>
+
+            <table class="table">
+              <thead>
+                <th>Unknown</th>
+                <th>Term</th>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>   
+          
+          <div id="stack" class="panel panel-default">
+            <div class="panel-heading">Remaining Goals</div>
+            <div class="panel-body">
+              <p>At a conjunction, one subgoal is evaluated first, and the other subgoal is added to the list of <em>remaining goals</em>. When evaluation of the current goal completes, the first remaining goal will be evaluated. When there are no more remaining goals, evaluation is complete for the original goal.</p>
+            </div>
+
+            <table class="table">
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+          
+          <div>
+              <small>Made by <a href="http://twitter.com/paf31">@paf31</a> using <a href="http://purexcript.org">PureScript</a>.</small>
+          </div>
         </div>
-      </div>
-      <div id="subst">
-        <div class="with-margin">
-	      <h3>Substitution</h3>
-          <ul>
-          </ul>
-        </div>
-      </div>
-      <div id="stack">
-        <div class="with-margin">
-	      <h3>Remaining Goals</h3>
-          <ul>
-          </ul>
-        </div>
-      </div>
-      <div id="info">
-        <div class="with-margin">
-	      <h3>Instructions</h3>
-          
-          <p>This application is a step-by-step evaluator for a dialect of <a href="https://github.com/jasonhemann/microKanren">microKanren</a>.</p>
-          
-          <h4>Goals</h4>
-          
-          <p>The current goal is shown on the right. Highlighted areas of the goal text can be clicked to evaluate the next step.</p>
-          <p>Some goals can be evaluated in only one way, and some goals can be evaluated in multiple (or zero) ways.</p>
-          <p>For example, at a disjunction or a conjunction, either of the two subgoals can be evaluated.</p>
-          <p>At a conjunction, one subgoal is evaluated first, and the other subgoal is added to the list of <em>remaining goals</em>, displayed on the right. When evaluation completes, the first remaining goal will be evaluated. When there are no more remaining goals, evaluation is complete for the original goal.</p>
-          
-          <h4>Substitutions</h4>
-          
-          <p>The current substitution is shown on the right. As goals are evaluated, the substitution will grow, until a solution is found or a contradiction is met.</p>
-          <p>The substitution grows when two terms are <em>unified</em>.</p>
+        <div class="col-xs-8">
+          <div id="goal">
+	        <h3>Current Goal</h3>
+            <div class="lines"></div>
+          </div>
         </div>
       </div>
     </div>
