@@ -18,6 +18,7 @@ import Kanren.Eval
 import Kanren.State
 import Kanren.Goal
 import Kanren.Term
+import Kanren.Subst
 import Kanren.Var
 import Kanren.Obj
 import Kanren.Unify
@@ -50,7 +51,7 @@ render st@(State g su var stk) = void do
   subst <- create "<ul>"
   
   for (sortBy (compare `Data.Function.on` fst) su) $ \(Tuple (Var nm) tm) -> do
-    let text = "#" ++ show nm ++ " = " ++ renderTerm tm
+    let text = "#" ++ show nm ++ " = " ++ renderTerm (walk su tm)
     pre <- create "<pre>" >>= appendText text
     li <- create "<li>" >>= append pre
     li `append` subst

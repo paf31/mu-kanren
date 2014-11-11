@@ -905,6 +905,9 @@ PS.Kanren_Subst = (function () {
             if (_397 instanceof Kanren_Term.TmVar) {
                 return Data_Maybe.fromMaybe(new Kanren_Term.TmVar(_397.value0))(Data_Foldable.lookup(Kanren_Var.eqVar)(Data_Foldable.foldableArray)(_397.value0)(_396));
             };
+            if (_397 instanceof Kanren_Term.TmPair) {
+                return new Kanren_Term.TmPair(walk(_396)(_397.value0), walk(_396)(_397.value1));
+            };
             return _397;
         };
     };
@@ -970,12 +973,12 @@ PS.Kanren_Unify = (function () {
                             return new Data_Maybe.Just(s);
                         };
                         if (_403 instanceof Kanren_Term.TmPair && _404 instanceof Kanren_Term.TmPair) {
-                            var _490 = unify(_403.value0)(_404.value0)(s);
-                            if (_490 instanceof Data_Maybe.Nothing) {
+                            var _492 = unify(_403.value0)(_404.value0)(s);
+                            if (_492 instanceof Data_Maybe.Nothing) {
                                 return Data_Maybe.Nothing.value;
                             };
-                            if (_490 instanceof Data_Maybe.Just) {
-                                return unify(_403.value1)(_404.value1)(_490.value0);
+                            if (_492 instanceof Data_Maybe.Just) {
+                                return unify(_403.value1)(_404.value1)(_492.value0);
                             };
                             throw new Error("Failed pattern match");
                         };
@@ -1084,11 +1087,12 @@ PS.Kanren_Render = (function () {
     var Data_Maybe = PS.Data_Maybe;
     var Data_Traversable = PS.Data_Traversable;
     var Data_Function = PS.Data_Function;
+    var Kanren_Subst = PS.Kanren_Subst;
     var render = function (_412) {
         var unwind = function (_417) {
             if (_417.value0 instanceof Kanren_Goal.Done && _417.value3.length >= 1) {
-                var _524 = _417.value3.slice(1);
-                return new Kanren_State.State(_417.value3[0], _417.value1, _417.value2, _524);
+                var _526 = _417.value3.slice(1);
+                return new Kanren_State.State(_417.value3[0], _417.value1, _417.value2, _526);
             };
             return _417;
         };
@@ -1173,12 +1177,12 @@ PS.Kanren_Render = (function () {
                                 return _423;
                             };
                             if (_425.length >= 1) {
-                                var _547 = _425.slice(1);
-                                var __tco__423 = Prelude[":"](new Data_Tuple.Tuple(_425[0], Prelude["++"](Data_Array.semigroupArray)(_424)(_547)))(_423);
+                                var _549 = _425.slice(1);
+                                var __tco__423 = Prelude[":"](new Data_Tuple.Tuple(_425[0], Prelude["++"](Data_Array.semigroupArray)(_424)(_549)))(_423);
                                 var __tco__424 = Prelude["++"](Data_Array.semigroupArray)(_424)([ _425[0] ]);
                                 _423 = __tco__423;
                                 _424 = __tco__424;
-                                _425 = _547;
+                                _425 = _549;
                                 continue tco;
                             };
                             throw new Error("Failed pattern match");
@@ -1218,12 +1222,12 @@ PS.Kanren_Render = (function () {
                         return Prelude["void"](Control_Monad_Eff.functorEff)((function () {
                             var text = "(= " + (renderTerm(_416.value0) + (" " + (renderTerm(_416.value1) + ")")));
                             var action = (function () {
-                                var _557 = Kanren_Unify.unify(_416.value0)(_416.value1)(_412.value1);
-                                if (_557 instanceof Data_Maybe.Nothing) {
+                                var _559 = Kanren_Unify.unify(_416.value0)(_416.value1)(_412.value1);
+                                if (_559 instanceof Data_Maybe.Nothing) {
                                     return render(new Kanren_State.State(Kanren_Goal.Fail.value, _412.value1, _412.value2, _412.value3));
                                 };
-                                if (_557 instanceof Data_Maybe.Just) {
-                                    return render(unwind(new Kanren_State.State(Kanren_Goal.Done.value, _557.value0, _412.value2, _412.value3)));
+                                if (_559 instanceof Data_Maybe.Just) {
+                                    return render(unwind(new Kanren_State.State(Kanren_Goal.Done.value, _559.value0, _412.value2, _412.value3)));
                                 };
                                 throw new Error("Failed pattern match");
                             })();
@@ -1301,7 +1305,7 @@ PS.Kanren_Render = (function () {
             Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#subst ul"))(Control_Monad_JQuery.remove)();
             var _45 = Control_Monad_JQuery.create("<ul>")();
             Data_Traversable["for"](Control_Monad_Eff.applicativeEff)(Data_Traversable.traversableArray)(Data_Array.sortBy(Data_Function.on(Prelude.compare(Kanren_Var.ordVar))(Data_Tuple.fst))(_412.value1))(function (_411) {
-                var text = "#" + (Prelude.show(Prelude.showNumber)(_411.value0) + (" = " + renderTerm(_411.value1)));
+                var text = "#" + (Prelude.show(Prelude.showNumber)(_411.value0) + (" = " + renderTerm(Kanren_Subst.walk(_412.value1)(_411.value1))));
                 return function __do() {
                     var _44 = Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.create("<pre>"))(Control_Monad_JQuery.appendText(text))();
                     var _43 = Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.create("<li>"))(Control_Monad_JQuery.append(_44))();
