@@ -1996,6 +1996,17 @@ PS.Kanren_Render = (function () {
             return Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#error"))(Control_Monad_JQuery.append(_77))();
         });
     };
+    var showEditor = Prelude["void"](Control_Monad_Eff.functorEff)(function __do() {
+        Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#editor"))(Control_Monad_JQuery.css({
+            display: "block"
+        }))();
+        Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#goal"))(Control_Monad_JQuery.css({
+            display: "none"
+        }))();
+        return Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#editButton"))(Control_Monad_JQuery.css({
+            display: "none"
+        }))();
+    });
     var render = function (_466) {
         var unwind = function (_471) {
             if (_471.value0 instanceof Kanren_Goal.Done && _471.value3.length >= 1) {
@@ -2227,6 +2238,17 @@ PS.Kanren_Render = (function () {
             })();
         });
     };
+    var hideEditor = Prelude["void"](Control_Monad_Eff.functorEff)(function __do() {
+        Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#editor"))(Control_Monad_JQuery.css({
+            display: "none"
+        }))();
+        Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#goal"))(Control_Monad_JQuery.css({
+            display: "block"
+        }))();
+        return Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#editButton"))(Control_Monad_JQuery.css({
+            display: "block"
+        }))();
+    });
     var $$eval = function __do() {
         var _79 = Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#editor textarea"))(Control_Monad_JQuery.getValue)();
         return (function () {
@@ -2241,15 +2263,7 @@ PS.Kanren_Render = (function () {
                 };
                 if (_740 instanceof Data_Either.Right) {
                     return function __do() {
-                        Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#editor"))(Control_Monad_JQuery.css({
-                            display: "none"
-                        }))();
-                        Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#goal"))(Control_Monad_JQuery.css({
-                            display: "block"
-                        }))();
-                        Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#editButton"))(Control_Monad_JQuery.css({
-                            display: "block"
-                        }))();
+                        hideEditor();
                         return render(new Kanren_State.State(_740.value0, [  ], Kanren_Var.zero, [  ]))();
                     };
                 };
@@ -2258,21 +2272,11 @@ PS.Kanren_Render = (function () {
             throw new Error("Failed pattern match");
         })()();
     };
-    var edit = Prelude["void"](Control_Monad_Eff.functorEff)(function __do() {
-        Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#editor"))(Control_Monad_JQuery.css({
-            display: "block"
-        }))();
-        Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#goal"))(Control_Monad_JQuery.css({
-            display: "none"
-        }))();
-        return Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#editButton"))(Control_Monad_JQuery.css({
-            display: "none"
-        }))();
-    });
     return {
-        edit: edit, 
         "eval": $$eval, 
+        hideEditor: hideEditor, 
         render: render, 
+        showEditor: showEditor, 
         showError: showError
     };
 })();
@@ -2295,7 +2299,7 @@ PS.Main = (function () {
         };
     };
     var main = function __do() {
-        Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#editButton"))(Control_Monad_JQuery.on("click")(withoutDefault(Kanren_Render.edit)))();
+        Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#editButton"))(Control_Monad_JQuery.on("click")(withoutDefault(Kanren_Render.showEditor)))();
         Prelude[">>="](Control_Monad_Eff.bindEff)(Control_Monad_JQuery.select("#evalButton"))(Control_Monad_JQuery.on("click")(withoutDefault(Kanren_Render["eval"])))();
         return Kanren_Render.render(Kanren_Eval.example)();
     };

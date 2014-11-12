@@ -15,7 +15,7 @@ withoutDefault action e _ = do
 
 main = do
   select "#editButton" >>= 
-    on "click" (withoutDefault edit)
+    on "click" (withoutDefault showEditor)
       
   select "#evalButton" >>= 
     on "click" (withoutDefault eval)

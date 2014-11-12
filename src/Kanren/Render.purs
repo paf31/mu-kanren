@@ -37,14 +37,23 @@ showError err = void do
     >>= appendText err
   select "#error" >>= append alert 
 
-edit :: forall eff. Eff (dom :: DOM | eff) Unit
-edit = void do
+showEditor :: forall eff. Eff (dom :: DOM | eff) Unit
+showEditor = void do
   select "#editor" 
     >>= css { display: "block" } 
   select "#goal" 
     >>= css { display: "none" }
   select "#editButton"  
     >>= css { display: "none" }
+    
+hideEditor :: forall eff. Eff (dom :: DOM | eff) Unit
+hideEditor = void do
+  select "#editor" 
+    >>= css { display: "none" } 
+  select "#goal" 
+    >>= css { display: "block" }
+  select "#editButton" 
+    >>= css { display: "block" }
     
 eval :: forall eff. Eff (dom :: DOM | eff) Unit
 eval = do
@@ -55,13 +64,7 @@ eval = do
     Right goal -> case parseGoal goal of
       Left err -> showError err
       Right goal -> do
-        select "#editor" 
-          >>= css { display: "none" } 
-        select "#goal" 
-          >>= css { display: "block" }
-        select "#editButton" 
-          >>= css { display: "block" }
-        
+        hideEditor
         render (State goal [] zero [])
 
 render :: forall eff. State -> Eff (dom :: DOM | eff) Unit 
