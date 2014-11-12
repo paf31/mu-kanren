@@ -1881,13 +1881,15 @@ PS.Kanren_Parser = (function () {
     Sexpr.create = function (value0) {
         return new Sexpr(value0);
     };
-    var parseAtom = Prelude["<$>"](Text_Parsing_Parser.functorParserT(Control_Monad_Identity.functorIdentity))(Prelude["<<<"](Prelude.semigroupoidArr)(Atom.create)(Data_String.joinWith("")))(Control_Alternative.some(Text_Parsing_Parser.alternativeParserT(Control_Monad_Identity.monadIdentity))(Text_Parsing_Parser.lazy1ParserT)(Text_Parsing_Parser_String.noneOf(Control_Monad_Identity.monadIdentity)([ " ", ")", "(", "\n", "\t", "\r" ])));
-    var parens = function (p) {
-        return Control_Apply["<*"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Control_Apply["<*"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Control_Apply["*>"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Control_Apply["*>"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Text_Parsing_Parser_String.string(Control_Monad_Identity.monadIdentity)("("))(Text_Parsing_Parser_String.whiteSpace(Control_Monad_Identity.monadIdentity)))(p))(Text_Parsing_Parser_String.whiteSpace(Control_Monad_Identity.monadIdentity)))(Text_Parsing_Parser_String.string(Control_Monad_Identity.monadIdentity)(")"));
-    };
-    var parseSexpr = Control_Lazy.fix1(Text_Parsing_Parser.lazy1ParserT)(function (p) {
-        return Control_Apply["<*"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Control_Apply["*>"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Text_Parsing_Parser_String.whiteSpace(Control_Monad_Identity.monadIdentity))(Control_Alt["<|>"](Text_Parsing_Parser.altParserT(Control_Monad_Identity.monadIdentity))(Text_Parsing_Parser_Combinators["try"](Control_Monad_Identity.functorIdentity)(parseAtom))(parens(Prelude["<$>"](Text_Parsing_Parser.functorParserT(Control_Monad_Identity.functorIdentity))(Sexpr.create)(Control_Alternative.many(Text_Parsing_Parser.alternativeParserT(Control_Monad_Identity.monadIdentity))(Text_Parsing_Parser.lazy1ParserT)(p))))))(Text_Parsing_Parser_String.whiteSpace(Control_Monad_Identity.monadIdentity));
-    });
+    var parseSexpr = (function () {
+        var parseAtom = Prelude["<$>"](Text_Parsing_Parser.functorParserT(Control_Monad_Identity.functorIdentity))(Prelude["<<<"](Prelude.semigroupoidArr)(Atom.create)(Data_String.joinWith("")))(Control_Alternative.some(Text_Parsing_Parser.alternativeParserT(Control_Monad_Identity.monadIdentity))(Text_Parsing_Parser.lazy1ParserT)(Text_Parsing_Parser_String.noneOf(Control_Monad_Identity.monadIdentity)([ " ", ")", "(", "\n", "\t", "\r" ])));
+        var parens = function (p) {
+            return Control_Apply["<*"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Control_Apply["<*"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Control_Apply["*>"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Control_Apply["*>"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Text_Parsing_Parser_String.string(Control_Monad_Identity.monadIdentity)("("))(Text_Parsing_Parser_String.whiteSpace(Control_Monad_Identity.monadIdentity)))(p))(Text_Parsing_Parser_String.whiteSpace(Control_Monad_Identity.monadIdentity)))(Text_Parsing_Parser_String.string(Control_Monad_Identity.monadIdentity)(")"));
+        };
+        return Control_Lazy.fix1(Text_Parsing_Parser.lazy1ParserT)(function (p) {
+            return Control_Apply["<*"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Control_Apply["*>"](Text_Parsing_Parser.applyParserT(Control_Monad_Identity.monadIdentity))(Text_Parsing_Parser_String.whiteSpace(Control_Monad_Identity.monadIdentity))(Control_Alt["<|>"](Text_Parsing_Parser.altParserT(Control_Monad_Identity.monadIdentity))(Text_Parsing_Parser_Combinators["try"](Control_Monad_Identity.functorIdentity)(parseAtom))(parens(Prelude["<$>"](Text_Parsing_Parser.functorParserT(Control_Monad_Identity.functorIdentity))(Sexpr.create)(Control_Alternative.many(Text_Parsing_Parser.alternativeParserT(Control_Monad_Identity.monadIdentity))(Text_Parsing_Parser.lazy1ParserT)(p))))))(Text_Parsing_Parser_String.whiteSpace(Control_Monad_Identity.monadIdentity));
+        });
+    })();
     var parseGoal = function (s) {
         var sexprToTerm = function (_429) {
             if (_429 instanceof Atom) {
@@ -1968,12 +1970,7 @@ PS.Kanren_Parser = (function () {
         throw new Error("Failed pattern match");
     };
     return {
-        Atom: Atom, 
-        Sexpr: Sexpr, 
-        parens: parens, 
-        parseAtom: parseAtom, 
-        parseGoal: parseGoal, 
-        parseSexpr: parseSexpr
+        parseGoal: parseGoal
     };
 })();
 var PS = PS || {};
