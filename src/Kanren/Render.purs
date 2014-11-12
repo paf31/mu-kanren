@@ -26,15 +26,6 @@ import Kanren.Var
 import Kanren.Obj
 import Kanren.Unify
 import Kanren.Parser
-
-foreign import fadeOut
-  "function fadeOut(ms) {\
-  \  return function(el) {\
-  \    return function() {\
-  \      return el.fadeOut(ms);\
-  \    };\
-  \  };\
-  \}" :: forall eff. Number -> JQuery -> Eff (dom :: DOM | eff) JQuery
  
 showError :: forall eff. String -> Eff (dom :: DOM | eff) Unit
 showError err = void do
