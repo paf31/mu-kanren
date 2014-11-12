@@ -8,8 +8,36 @@
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/Main.js"></script>
+    <script type="text/javascript" src="js/ace/ace.js" charset="utf-8"></script>
+    <script type="text/javascript" src="js/ace/mode-haskell.js"></script>
+    <script type="text/javascript" src="js/ace/theme-dawn.js"></script>
+    
     <script type="text/javascript">
       $(function() {
+        var createEditor = function(id) {
+            
+          var ace_id = 'ace_' + id;    
+            
+          var editor = ace.edit(ace_id);
+        
+          editor.setTheme('ace/theme/dawn');
+          editor.renderer.setShowGutter(false);
+        
+          var session = editor.getSession();
+        
+          session.setMode('ace/mode/lisp');
+          session.setValue($('#' + id).val());
+          session.setUseWrapMode(true);
+          session.on('change', function(){
+            $('#' + id).val(editor.getSession().getValue());
+          });
+        
+          $('#' + ace_id).height('250px');
+        };
+        
+        createEditor('code');
+        createEditor('defines');
+      
         PS.Main.main();
       });
     </script> 
@@ -78,11 +106,13 @@
           
           <div id="editor">
 	        <h3>Edit Goal</h3>
+            <div id="ace_code"></div>
             <textarea id="code" class="form-control" rows="15">(fresh xs ys 
   (appendo xs ys (a (b (c nil))))
 )</textarea>
 
             <h3>Defines</h3>
+            <div id="ace_defines"></div>
             <textarea id="defines" class="form-control" rows="15">
 (define appendo xs ys zs 
   (disj (conj (= xs nil)

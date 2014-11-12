@@ -31,3 +31,7 @@
 #editButton, #undoButton {
     display: none;
 }
+
+#code, #defines {
+    display: none;
+}
