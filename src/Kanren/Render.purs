@@ -3,10 +3,13 @@ module Kanren.Render where
 import DOM
 
 import Data.Maybe
+import Data.Either
 import Data.Tuple
 import Data.Array (length, sortBy, (..))
 import Data.Foldable (intercalate)
 import Data.Traversable (for)
+import Data.Foreign
+import Data.Foreign.Class
 
 import Control.Bind
 import Control.Apply
@@ -22,6 +25,53 @@ import Kanren.Subst
 import Kanren.Var
 import Kanren.Obj
 import Kanren.Unify
+import Kanren.Parser
+
+foreign import fadeOut
+  "function fadeOut(ms) {\
+  \  return function(el) {\
+  \    return function() {\
+  \      return el.fadeOut(ms);\
+  \    };\
+  \  };\
+  \}" :: forall eff. Number -> JQuery -> Eff (dom :: DOM | eff) JQuery
+ 
+showError :: forall eff. String -> Eff (dom :: DOM | eff) Unit
+showError err = void do
+  button <- create "<button type='button' class='close' data-dismiss='alert'>&times;</button>"
+  alert <- create "<div>"
+    >>= addClass "alert alert-danger alert-dismissible"
+    >>= attr { role: "alert" }
+    >>= append button
+    >>= appendText err
+  select "#error" >>= append alert 
+
+edit :: forall eff. Eff (dom :: DOM | eff) Unit
+edit = void do
+  select "#editor" 
+    >>= css { display: "block" } 
+  select "#goal" 
+    >>= css { display: "none" }
+  select "#editButton"  
+    >>= css { display: "none" }
+    
+eval :: forall eff. Eff (dom :: DOM | eff) Unit
+eval = do
+  code <- select "#editor textarea" >>= getValue
+  
+  case read code of
+    Left err -> showError (show err)
+    Right goal -> case parseGoal goal of
+      Left err -> showError err
+      Right goal -> do
+        select "#editor" 
+          >>= css { display: "none" } 
+        select "#goal" 
+          >>= css { display: "block" }
+        select "#editButton" 
+          >>= css { display: "block" }
+        
+        render (State goal [] zero [])
 
 render :: forall eff. State -> Eff (dom :: DOM | eff) Unit 
 render st@(State g su var stk) = void do

@@ -60,24 +60,34 @@
               <small>Made by <a href="http://twitter.com/paf31">@paf31</a> using <a href="http://purescript.org">PureScript</a>.</small>
           </div>
         </div>
-        <div class="col-xs-8">
+        <div class="col-xs-7">
           <ul class="nav nav-pills">
             <li role="presentation">
-              <a href="#"><span class="fa fa-edit"></span> Edit</a>
-            </li>
+              <a href="#" id="evalButton"><span class="fa fa-play"></span> Run</a>
+            </li>  
             <li role="presentation">
-              <a href="#"><span class="fa fa-undo"></span> Reset</a></a>
+              <a href="#" id="editButton"><span class="fa fa-edit"></span> Edit</a>
             </li>
             <li role="presentation">
               <a href="#" data-toggle="modal" data-target="#help">
                 <span class="fa fa-question"></span> Help
               </a>
             </li>
-          </ul>    
+          </ul>  
             
           <div id="goal">
 	        <h3>Current Goal</h3>
             <div class="lines"></div>
+          </div>
+          
+          <div id="editor">
+	        <h3>Edit Goal</h3>
+            <textarea class="form-control" rows="20">(fresh xs ys 
+  (appendo xs ys (a (b (c nil))))
+)</textarea>
+          </div>  
+            
+          <div id="error">
           </div>
         </div>
       </div>
@@ -93,7 +103,7 @@
           <div class="modal-body">
             <h4>Terms</h4>
             
-            <p>The language consists of three types of terms:</p>
+            <p>The language consists of two types of terms:</p>
             
             <ul>
               <li>Symbols, such as <code>a</code>, <code>b</code>, <code>c</code>, and <code>nil</code>.</li>

@@ -1,4 +1,4 @@
-module Kanren.Parser (parseGoal) where
+module Kanren.Parser  where
     
 import Data.Maybe 
 import Data.Either
@@ -29,10 +29,10 @@ instance showSexpr :: Show Sexpr where
   show (Sexpr ss) = "(Sexpr " ++ show ss ++ ")"
 
 parseSexpr :: Parser String Sexpr
-parseSexpr = fix1 $ \p -> parseAtom <|> parens (Sexpr <$> many (whiteSpace *> p))
+parseSexpr = fix1 $ \p -> whiteSpace *> (try parseAtom <|> parens (Sexpr <$> many p)) <* whiteSpace
 
 parens :: forall a. Parser String a -> Parser String a
-parens p = whiteSpace *> string "(" *> whiteSpace *> p <* whiteSpace <* string ")"
+parens p = string "(" *> whiteSpace *> p <* whiteSpace <* string ")"
 
 parseAtom :: forall a. Parser String Sexpr
 parseAtom = Atom <<< S.joinWith "" <$> some (noneOf [" ", ")", "(", "\n", "\t", "\r"])

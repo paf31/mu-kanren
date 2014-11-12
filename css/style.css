@@ -30,3 +30,16 @@
 .indented {
     margin-left: 10px;
 }
+
+#goal {
+    display: none;
+}
+
+#editor textarea {
+    font-family: monospace;
+    font-size: 14px;
+}
+
+#editButton {
+    display: none;
+}
