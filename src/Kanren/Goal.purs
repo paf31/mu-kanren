@@ -1,11 +1,18 @@
-module Kanren.Goal
-  ( Goal(..)
-  ) where    
+module Kanren.Goal where    
     
 import Data.Foldable (intercalate)    
     
 import Kanren.Term
 import Kanren.Var    
+    
+data Define = Define String [String] Goal 
+    
+instance showDefine :: Show Define where    
+  show (Define nm args g) = "(Define" ++   
+    " " ++ show nm ++
+    " " ++ show args ++
+    " " ++ show g ++
+    ")" 
     
 data Goal 
   = Done

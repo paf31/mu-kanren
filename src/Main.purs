@@ -2,6 +2,8 @@ module Main where
 
 import DOM
 
+import Data.Maybe
+
 import Control.Monad.Eff
 import Control.Monad.Eff.Ref
 import Control.Monad.JQuery
@@ -16,12 +18,14 @@ withoutDefault action e _ = do
 
 main = do
   history <- newRef []
+  
+  defines <- newRef Nothing
     
   select "#editButton" >>= 
     on "click" (withoutDefault showEditor)
       
   select "#evalButton" >>= 
-    on "click" (withoutDefault (eval history))
+    on "click" (withoutDefault (eval defines history))
       
   select "#undoButton" >>= 
     on "click" (withoutDefault $ do
@@ -30,5 +34,5 @@ main = do
         [] -> return unit
         (st : sts') -> do
           writeRef history sts'
-          render history st
+          render defines history st
     )

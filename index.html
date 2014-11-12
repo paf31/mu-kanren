@@ -78,8 +78,23 @@
           
           <div id="editor">
 	        <h3>Edit Goal</h3>
-            <textarea class="form-control" rows="20">(fresh xs ys 
+            <textarea id="code" class="form-control" rows="15">(fresh xs ys 
   (appendo xs ys (a (b (c nil))))
+)</textarea>
+
+            <h3>Defines</h3>
+            <textarea id="defines" class="form-control" rows="15">
+(define appendo xs ys zs 
+  (disj (conj (= xs nil)
+              (= ys zs)
+        )
+        (fresh x xs' res
+          (conj (= xs (x xs'))
+                (appendo xs' ys res)
+                (= zs (x res))
+          )
+        )
+  )
 )</textarea>
           </div>  
             
@@ -164,6 +179,31 @@
             <pre><code>(fresh x y z (= x (y z)))</code></pre>
             
             <p>This goal generates three fresh names, and asserts that <code>x</code> is equal to the pair <code>(y z)</code>. Execution will try to find terms <code>x</code>, <code>y</code> and <code>z</code> such that this relation holds.</p>
+            
+            <h4>Defining Functions</h4>
+            
+            <p>The <em>defines</em> pane can be used to define functions which can be used in the goal. A function is defined using the <code>define</code> keyword, which takes a list of arguments and the defined goal. For example, to define the <code>addo</code> relation on natural numbers:</p>
+            
+            <pre><code>(define addo x y z 
+  (disj (conj (= x zero)
+              (= y z)
+        )
+        (fresh p r
+          (conj (= x (succ p))
+                (addo p y r)
+                (= z (succ r))
+          )
+        )
+  )
+)</code></pre> 
+
+            <p>This function can then be used in the goal, to search for numbers which sum to <code>(succ (succ zero))</code> (2):</p>
+                        
+            <pre><code>(fresh x y 
+  (addo x y (succ (succ zero)))
+)</code></pre>
+
+            <p>Note that functions can be defined recursively.</p>
           </div>
           <div class="modal-footer">
             <a type="button" class="btn btn-default" data-dismiss="modal">Close</a>

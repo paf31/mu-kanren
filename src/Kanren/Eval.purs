@@ -2,7 +2,9 @@ module Kanren.Eval where
 
 import Data.Maybe
 import Data.Tuple
-import Data.Foldable (foldl, elem)
+import Data.Either
+import Data.Array (length)
+import Data.Foldable (foldl, elem, find)
 
 import Kanren.Var
 import Kanren.Obj
@@ -12,16 +14,6 @@ import Kanren.State
 import Kanren.Stack
 import Kanren.Goal
 import Kanren.Unify
-
-example :: State
-example = State goal [] zero []
-  where
-  goal :: Goal
-  goal = Fresh ["xs", "ys"] $ 
-           Named "appendo" [ obj "xs"
-                           , obj "ys"
-                           , TmPair (obj "a") (TmPair (obj "b") (TmPair (obj "c") (obj "nil")))
-                           ] 
       
 replace :: String -> Term -> Goal -> Goal
 replace nm r = onGoals
@@ -40,15 +32,9 @@ replace nm r = onGoals
 replaceAll :: [Tuple String Term] -> Goal -> Goal
 replaceAll = foldl (\f (Tuple nm r) g -> replace nm r (f g)) id
   
-builtIn :: String -> [Term] -> Goal
-builtIn "appendo" [xs, ys, zs] = 
-  Disj [ Conj [ Unify xs (obj "nil")
-              , Unify ys zs
-              ]
-       , Fresh ["x", "xs'", "res"] $ 
-           Conj [ Unify xs (TmPair (obj "x") (obj "xs'"))
-                , Named "appendo" [obj "xs'", ys, obj "res"]
-                , Unify zs (TmPair (obj "x") (obj "res"))
-                ]
-       ]
-                    
+builtIn :: [Define] -> String -> [Term] -> Either String Goal
+builtIn defines nm args = 
+  case find (\(Define nm' _ _) -> nm == nm') defines of
+    Just (Define _ argNames g) | length argNames == length args  -> Right $ replaceAll (zip argNames args) g
+    Just _ -> Left $ "Incorrect number of arguments to " ++ show nm
+    Nothing -> Left $ "Unknown function " ++ show nm

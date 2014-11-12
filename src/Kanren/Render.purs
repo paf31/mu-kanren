@@ -60,25 +60,28 @@ hideEditor = void do
   select "#undoButton" 
     >>= css { display: "block" }
     
-eval :: forall eff. RefVal [State] -> Eff (ref :: Ref, dom :: DOM | eff) Unit
-eval history = do
-  code <- select "#editor textarea" >>= getValue
+eval :: forall eff. RefVal (Maybe [Define]) -> RefVal [State] -> Eff (ref :: Ref, dom :: DOM | eff) Unit
+eval definesRef history = do
+  code <- select "#code" >>= getValue
+  defines <- select "#defines" >>= getValue
   
-  case read code of
+  case Tuple <$> read code <*> read defines of
     Left err -> showError (show err)
-    Right goal -> case parseGoal goal of
-      Left err -> showError err
-      Right goal -> do
-        writeRef history []
-        render history (State goal [] zero [])
+    Right (Tuple code defines) -> 
+      case Tuple <$> parseGoal code <*> parseDefines defines of
+        Left err -> showError err
+        Right (Tuple goal defines) -> do
+          writeRef history []
+          writeRef definesRef $ Just defines
+          render definesRef history (State goal [] zero [])
   
-renderSavingState :: forall eff. State -> RefVal [State] -> State -> Eff (ref :: Ref, dom :: DOM | eff) Unit   
-renderSavingState oldState history newState = do  
+renderSavingState :: forall eff. RefVal (Maybe [Define]) -> State -> RefVal [State] -> State -> Eff (ref :: Ref, dom :: DOM | eff) Unit   
+renderSavingState definesRef oldState history newState = do  
   modifyRef history ((:) oldState)
-  render history newState
+  render definesRef history newState
   
-render :: forall eff. RefVal [State] -> State -> Eff (ref :: Ref, dom :: DOM | eff) Unit   
-render history st@(State g su var stk) = void do 
+render :: forall eff. RefVal (Maybe [Define]) -> RefVal [State] -> State -> Eff (ref :: Ref, dom :: DOM | eff) Unit   
+render definesRef history st@(State g su var stk) = void do 
       
   -- Hide the editor panel
     
@@ -144,7 +147,7 @@ render history st@(State g su var stk) = void do
     let freshNames = TmVar <<< Var <$> (runVar var .. (runVar var + length ns - 1))
         newState = State (replaceAll (zip ns freshNames) g) su nextVar stk
         nextVar = Var (runVar var + length ns)
-    link <- linkTo renderLinks (renderSavingState st history newState)
+    link <- linkTo renderLinks (renderSavingState definesRef st history newState)
               >>= appendText ("(fresh " ++ intercalate " " ns ++ "")
     line <- newLine >>= append link
     line `append` jq
@@ -156,26 +159,30 @@ render history st@(State g su var stk) = void do
   renderGoal renderLinks jq (Unify u v) = void do
     let text = "(= " ++ renderTerm u ++ " " ++ renderTerm v ++ ")"
         action = case unify u v su of
-          Nothing -> renderSavingState st history $ State Fail su var stk
-          Just su' -> renderSavingState st history $ unwind $ State Done su' var stk
+          Nothing -> renderSavingState definesRef st history $ State Fail su var stk
+          Just su' -> renderSavingState definesRef st history $ unwind $ State Done su' var stk
     link <- linkTo renderLinks action 
               >>= appendText text
     line <- newLine >>= append link
     line `append` jq
-  renderGoal renderLinks jq (Named nm ts) = void do
-    let text = "(" ++ nm ++ " " ++ intercalate " " (renderTerm <$> ts) ++ ")"
-        newState = State (builtIn nm ts) su var stk
-    link <- linkTo renderLinks (renderSavingState st history newState) 
-              >>= appendText text
-    line <- newLine >>= append link
-    line `append` jq
+  renderGoal renderLinks jq (Named nm ts) = do
+    Just defines <- readRef definesRef
+    case builtIn defines nm ts of
+      Left err -> showError err
+      Right newGoal ->  void do
+        let text = "(" ++ nm ++ " " ++ intercalate " " (renderTerm <$> ts) ++ ")"
+            newState = State newGoal su var stk
+        link <- linkTo renderLinks (renderSavingState definesRef st history newState) 
+                  >>= appendText text
+        line <- newLine >>= append link
+        line `append` jq
   renderGoal renderLinks jq (Disj gs) = void do
     line <- newLine >>= appendText "(disj"
     line `append` jq
     
     for gs $ \g -> do
       i <- indented
-      a <- linkTo renderLinks (renderSavingState st history (unwind (State g su var stk))) 
+      a <- linkTo renderLinks (renderSavingState definesRef st history (unwind (State g su var stk))) 
       renderGoal false a g
       a `append` i
       i `append` jq
@@ -188,7 +195,7 @@ render history st@(State g su var stk) = void do
     
     for (inContext gs) $ \(Tuple g rest) -> do
       i <- indented
-      a <- linkTo renderLinks (renderSavingState st history (unwind (State g su var (rest ++ stk)))) 
+      a <- linkTo renderLinks (renderSavingState definesRef st history (unwind (State g su var (rest ++ stk)))) 
       renderGoal false a g
       a `append` i
       i `append` jq
