@@ -5,7 +5,7 @@ import DOM
 import Data.Maybe
 import Data.Either
 import Data.Tuple
-import Data.Array (length, sortBy, (..))
+import Data.Array (length, null, sortBy, (..))
 import Data.Foldable (intercalate)
 import Data.Traversable (for)
 import Data.Foreign
@@ -15,6 +15,7 @@ import Control.Bind
 import Control.Apply
 import Control.Monad (when, unless)
 import Control.Monad.Eff
+import Control.Monad.Eff.Ref
 import Control.Monad.JQuery
 
 import Kanren.Eval
@@ -45,6 +46,8 @@ showEditor = void do
     >>= css { display: "none" }
   select "#editButton"  
     >>= css { display: "none" }
+  select "#undoButton"  
+    >>= css { display: "none" }
     
 hideEditor :: forall eff. Eff (dom :: DOM | eff) Unit
 hideEditor = void do
@@ -54,9 +57,11 @@ hideEditor = void do
     >>= css { display: "block" }
   select "#editButton" 
     >>= css { display: "block" }
+  select "#undoButton" 
+    >>= css { display: "block" }
     
-eval :: forall eff. Eff (dom :: DOM | eff) Unit
-eval = do
+eval :: forall eff. RefVal [State] -> Eff (ref :: Ref, dom :: DOM | eff) Unit
+eval history = do
   code <- select "#editor textarea" >>= getValue
   
   case read code of
@@ -64,11 +69,27 @@ eval = do
     Right goal -> case parseGoal goal of
       Left err -> showError err
       Right goal -> do
-        hideEditor
-        render (State goal [] zero [])
-
-render :: forall eff. State -> Eff (dom :: DOM | eff) Unit 
-render st@(State g su var stk) = void do
+        writeRef history []
+        render history (State goal [] zero [])
+  
+renderSavingState :: forall eff. State -> RefVal [State] -> State -> Eff (ref :: Ref, dom :: DOM | eff) Unit   
+renderSavingState oldState history newState = do  
+  modifyRef history ((:) oldState)
+  render history newState
+  
+render :: forall eff. RefVal [State] -> State -> Eff (ref :: Ref, dom :: DOM | eff) Unit   
+render history st@(State g su var stk) = void do 
+      
+  -- Hide the editor panel
+    
+  hideEditor    
+  
+  -- Update the Undo button
+  
+  sts <- readRef history
+  select "#undoButton" 
+    >>= css { display: if null sts then "none" else "block" }  
+    
   -- Update the goal    
     
   select "#goal .lines" >>= remove    
@@ -114,7 +135,7 @@ render st@(State g su var stk) = void do
   renderShortGoal (Conj _) = "conj"
   renderShortGoal (Named name _) = name
     
-  renderGoal :: forall eff. Boolean -> JQuery -> Goal -> Eff (dom :: DOM | eff) Unit 
+  renderGoal :: forall eff. Boolean -> JQuery -> Goal -> Eff (ref :: Ref, dom :: DOM | eff) Unit 
   renderGoal _           jq Done = void do
     "Evaluation complete" `appendText` jq
   renderGoal _           jq Fail = void do
@@ -123,7 +144,7 @@ render st@(State g su var stk) = void do
     let freshNames = TmVar <<< Var <$> (runVar var .. (runVar var + length ns - 1))
         newState = State (replaceAll (zip ns freshNames) g) su nextVar stk
         nextVar = Var (runVar var + length ns)
-    link <- linkTo renderLinks (render newState)
+    link <- linkTo renderLinks (renderSavingState st history newState)
               >>= appendText ("(fresh " ++ intercalate " " ns ++ "")
     line <- newLine >>= append link
     line `append` jq
@@ -135,8 +156,8 @@ render st@(State g su var stk) = void do
   renderGoal renderLinks jq (Unify u v) = void do
     let text = "(= " ++ renderTerm u ++ " " ++ renderTerm v ++ ")"
         action = case unify u v su of
-          Nothing -> render $ State Fail su var stk
-          Just su' -> render $ unwind $ State Done su' var stk
+          Nothing -> renderSavingState st history $ State Fail su var stk
+          Just su' -> renderSavingState st history $ unwind $ State Done su' var stk
     link <- linkTo renderLinks action 
               >>= appendText text
     line <- newLine >>= append link
@@ -144,7 +165,7 @@ render st@(State g su var stk) = void do
   renderGoal renderLinks jq (Named nm ts) = void do
     let text = "(" ++ nm ++ " " ++ intercalate " " (renderTerm <$> ts) ++ ")"
         newState = State (builtIn nm ts) su var stk
-    link <- linkTo renderLinks (render newState) 
+    link <- linkTo renderLinks (renderSavingState st history newState) 
               >>= appendText text
     line <- newLine >>= append link
     line `append` jq
@@ -154,7 +175,7 @@ render st@(State g su var stk) = void do
     
     for gs $ \g -> do
       i <- indented
-      a <- linkTo renderLinks (render (unwind (State g su var stk))) 
+      a <- linkTo renderLinks (renderSavingState st history (unwind (State g su var stk))) 
       renderGoal false a g
       a `append` i
       i `append` jq
@@ -167,7 +188,7 @@ render st@(State g su var stk) = void do
     
     for (inContext gs) $ \(Tuple g rest) -> do
       i <- indented
-      a <- linkTo renderLinks (render (unwind (State g su var (rest ++ stk)))) 
+      a <- linkTo renderLinks (renderSavingState st history (unwind (State g su var (rest ++ stk)))) 
       renderGoal false a g
       a `append` i
       i `append` jq

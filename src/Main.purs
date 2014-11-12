@@ -3,6 +3,7 @@ module Main where
 import DOM
 
 import Control.Monad.Eff
+import Control.Monad.Eff.Ref
 import Control.Monad.JQuery
 
 import Kanren.Eval
@@ -14,10 +15,20 @@ withoutDefault action e _ = do
   preventDefault e
 
 main = do
+  history <- newRef []
+    
   select "#editButton" >>= 
     on "click" (withoutDefault showEditor)
       
   select "#evalButton" >>= 
-    on "click" (withoutDefault eval)
-    
-  render example
+    on "click" (withoutDefault (eval history))
+      
+  select "#undoButton" >>= 
+    on "click" (withoutDefault $ do
+      sts <- readRef history    
+      case sts of
+        [] -> return unit
+        (st : sts') -> do
+          writeRef history sts'
+          render history st
+    )

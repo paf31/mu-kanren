@@ -1,15 +1,3 @@
-#info {
-}
-
-#goal {
-}
-
-#subst {
-}
-
-#stack {
-}
-
 .lines {
     margin: 10px;
     font-family: monospace;
@@ -40,6 +28,6 @@
     font-size: 14px;
 }
 
-#editButton {
+#editButton, #undoButton {
     display: none;
 }
