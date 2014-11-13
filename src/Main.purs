@@ -17,22 +17,9 @@ withoutDefault action e _ = do
   preventDefault e
 
 main = do
-  history <- newRef []
-  
-  defines <- newRef Nothing
-    
   select "#editButton" >>= 
     on "click" (withoutDefault showEditor)
       
   select "#evalButton" >>= 
-    on "click" (withoutDefault (eval defines history))
-      
-  select "#undoButton" >>= 
-    on "click" (withoutDefault $ do
-      sts <- readRef history    
-      case sts of
-        [] -> return unit
-        (st : sts') -> do
-          writeRef history sts'
-          render defines history st
-    )
+    on "click" (withoutDefault eval)
+    

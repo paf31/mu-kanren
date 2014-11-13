@@ -58,7 +58,7 @@
           <div id="subst" class="panel panel-default">
             <div class="panel-heading">Substitution</div>
 
-            <table class="table">
+            <table class="table table-condensed">
               <thead>
                 <th>Unknown</th>
                 <th>Term</th>
@@ -68,11 +68,20 @@
             </table>
           </div>   
           
-          <div id="stack" class="panel panel-default">
+          <div id="rgs" class="panel panel-default">
             <div class="panel-heading">Remaining Goals</div>
 
-            <table class="table">
+            <table class="table table-condensed">
               <tbody>
+              </tbody>
+            </table>
+          </div>
+          
+          <div id="stack" class="panel panel-default">
+            <div class="panel-heading">Execution Trace</div>
+
+            <table class="table table-condensed">
+              <tbody class="rowlink">
               </tbody>
             </table>
           </div>
@@ -89,9 +98,6 @@
             <li role="presentation">
               <a href="#" id="editButton"><span class="fa fa-edit"></span> Edit</a>
             </li>  
-            <li role="presentation">
-              <a href="#" id="undoButton"><span class="fa fa-undo"></span> Undo</a>
-            </li>
             <li role="presentation">
               <a href="#" data-toggle="modal" data-target="#help">
                 <span class="fa fa-question"></span> Help

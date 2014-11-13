@@ -46,8 +46,6 @@ showEditor = void do
     >>= css { display: "none" }
   select "#editButton"  
     >>= css { display: "none" }
-  select "#undoButton"  
-    >>= css { display: "none" }
     
 hideEditor :: forall eff. Eff (dom :: DOM | eff) Unit
 hideEditor = void do
@@ -57,11 +55,9 @@ hideEditor = void do
     >>= css { display: "block" }
   select "#editButton" 
     >>= css { display: "block" }
-  select "#undoButton" 
-    >>= css { display: "block" }
     
-eval :: forall eff. RefVal (Maybe [Define]) -> RefVal [State] -> Eff (ref :: Ref, dom :: DOM | eff) Unit
-eval definesRef history = do
+eval :: forall eff. Eff (ref :: Ref, dom :: DOM | eff) Unit
+eval = do
   code <- select "#code" >>= getValue
   defines <- select "#defines" >>= getValue
   
@@ -71,27 +67,14 @@ eval definesRef history = do
       case Tuple <$> parseGoal code <*> parseDefines defines of
         Left err -> showError err
         Right (Tuple goal defines) -> do
-          writeRef history []
-          writeRef definesRef $ Just defines
-          render definesRef history (State goal [] zero [])
+          render defines (State goal [] zero [] [])
   
-renderSavingState :: forall eff. RefVal (Maybe [Define]) -> State -> RefVal [State] -> State -> Eff (ref :: Ref, dom :: DOM | eff) Unit   
-renderSavingState definesRef oldState history newState = do  
-  modifyRef history ((:) oldState)
-  render definesRef history newState
-  
-render :: forall eff. RefVal (Maybe [Define]) -> RefVal [State] -> State -> Eff (ref :: Ref, dom :: DOM | eff) Unit   
-render definesRef history st@(State g su var stk) = void do 
+render :: forall eff. [Define] -> State -> Eff (ref :: Ref, dom :: DOM | eff) Unit   
+render defines st@(State g su var rgs hist) = void do 
       
   -- Hide the editor panel
     
-  hideEditor    
-  
-  -- Update the Undo button
-  
-  sts <- readRef history
-  select "#undoButton" 
-    >>= css { display: if null sts then "none" else "block" }  
+  hideEditor
     
   -- Update the goal    
     
@@ -101,16 +84,31 @@ render definesRef history st@(State g su var stk) = void do
   renderGoal true goal g
   select "#goal" >>= append goal
     
-  -- Update the stack    
+  -- Update the remaining goals    
+    
+  select "#rgs tbody tr" >>= remove
+  rgsBody <- select "#rgs tbody"
+  
+  for rgs $ \g' -> void do 
+    tr <- create "<tr>"
+    td <- create "<td>"
+    pre <- create "<code>" >>= appendText (renderShortGoal g')
+    pre `append` td
+    td `append` tr
+    tr `append` rgsBody
+    
+  -- Update the call stack
     
   select "#stack tbody tr" >>= remove
   stackBody <- select "#stack tbody"
   
-  for stk $ \g' -> void do 
+  for hist $ \(st@State g' _ _ _ _) -> void do 
     tr <- create "<tr>"
     td <- create "<td>"
-    pre <- create "<pre>" >>= appendText (renderShortGoal g')
-    pre `append` td
+    pre <- create "<code>" >>= appendText (renderShortGoal g')
+    link <- linkTo true (render defines st)
+              >>= append pre
+    link `append` td
     td `append` tr
     tr `append` stackBody
   
@@ -123,7 +121,7 @@ render definesRef history st@(State g su var stk) = void do
   for (sortBy (compare `Data.Function.on` fst) su) $ \(Tuple (Var nm) tm) -> do
     tr <- create "<tr>"
     td1 <- create "<td>" >>= appendText ("#" ++ show nm)
-    pre <- create "<pre>" >>= appendText (renderTerm (walk su tm))
+    pre <- create "<code>" >>= appendText (renderTerm (walk su tm))
     td2 <- create "<td>" >>= append pre
     td1 `append` tr
     td2 `append` tr
@@ -132,8 +130,8 @@ render definesRef history st@(State g su var stk) = void do
       
   renderShortGoal :: Goal -> String
   renderShortGoal Done = "Done"
-  renderShortGoal (Fresh ns _) = "fresh " ++ intercalate " " ns
-  renderShortGoal (Unify u v) = renderTerm u ++ " == " ++ renderTerm v
+  renderShortGoal (Fresh _ _) = "fresh"
+  renderShortGoal (Unify _ _) = "unify"
   renderShortGoal (Disj _) = "disj"
   renderShortGoal (Conj _) = "conj"
   renderShortGoal (Named name _) = name
@@ -145,9 +143,9 @@ render definesRef history st@(State g su var stk) = void do
     "Contradiction!" `appendText` jq
   renderGoal renderLinks jq (Fresh ns g) = void do
     let freshNames = TmVar <<< Var <$> (runVar var .. (runVar var + length ns - 1))
-        newState = State (replaceAll (zip ns freshNames) g) su nextVar stk
+        newState = State (replaceAll (zip ns freshNames) g) su nextVar rgs (st : hist)
         nextVar = Var (runVar var + length ns)
-    link <- linkTo renderLinks (renderSavingState definesRef st history newState)
+    link <- linkTo renderLinks (render defines newState)
               >>= appendText ("(fresh " ++ intercalate " " ns ++ "")
     line <- newLine >>= append link
     line `append` jq
@@ -159,20 +157,19 @@ render definesRef history st@(State g su var stk) = void do
   renderGoal renderLinks jq (Unify u v) = void do
     let text = "(= " ++ renderTerm u ++ " " ++ renderTerm v ++ ")"
         action = case unify u v su of
-          Nothing -> renderSavingState definesRef st history $ State Fail su var stk
-          Just su' -> renderSavingState definesRef st history $ unwind $ State Done su' var stk
+          Nothing -> render defines $ State Fail su var rgs (st : hist)
+          Just su' -> render defines $ unwind $ State Done su' var rgs (st : hist)
     link <- linkTo renderLinks action 
               >>= appendText text
     line <- newLine >>= append link
     line `append` jq
   renderGoal renderLinks jq (Named nm ts) = do
-    Just defines <- readRef definesRef
     case builtIn defines nm ts of
       Left err -> showError err
       Right newGoal ->  void do
         let text = "(" ++ nm ++ " " ++ intercalate " " (renderTerm <$> ts) ++ ")"
-            newState = State newGoal su var stk
-        link <- linkTo renderLinks (renderSavingState definesRef st history newState) 
+            newState = State newGoal su var rgs (st : hist)
+        link <- linkTo renderLinks (render defines newState) 
                   >>= appendText text
         line <- newLine >>= append link
         line `append` jq
@@ -182,7 +179,7 @@ render definesRef history st@(State g su var stk) = void do
     
     for gs $ \g -> do
       i <- indented
-      a <- linkTo renderLinks (renderSavingState definesRef st history (unwind (State g su var stk))) 
+      a <- linkTo renderLinks (render defines (unwind (State g su var rgs (st : hist)))) 
       renderGoal false a g
       a `append` i
       i `append` jq
@@ -195,7 +192,7 @@ render definesRef history st@(State g su var stk) = void do
     
     for (inContext gs) $ \(Tuple g rest) -> do
       i <- indented
-      a <- linkTo renderLinks (renderSavingState definesRef st history (unwind (State g su var (rest ++ stk)))) 
+      a <- linkTo renderLinks (render defines (unwind (State g su var (rest ++ rgs) (st : hist)))) 
       renderGoal false a g
       a `append` i
       i `append` jq
@@ -204,7 +201,7 @@ render definesRef history st@(State g su var stk) = void do
     close `append` jq
   
   unwind :: State -> State
-  unwind (State Done subst var (goal : stack)) = State goal subst var stack
+  unwind (State Done subst var (goal : rest) hist) = State goal subst var rest hist
   unwind other = other
   
   linkTo :: forall eff a. Boolean -> (Eff (dom :: DOM | eff) a) -> Eff (dom :: DOM | eff) JQuery 
