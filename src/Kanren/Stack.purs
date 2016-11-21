@@ -1,8 +1,6 @@
 module Kanren.Stack where
 
-import Data.Monoid
-import Data.Foldable
+import Kanren.Goal (Goal)
+import Data.List (List)
 
-import Kanren.Goal
-
-type Stack = [Goal]
+type Stack = List Goal

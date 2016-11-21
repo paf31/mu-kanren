@@ -1,10 +1,10 @@
 module Kanren.Unify where
-    
-import Data.Maybe
-    
-import Kanren.Term
-import Kanren.Subst    
-    
+
+import Prelude
+import Data.Maybe (Maybe(..))
+import Kanren.Term (Term(..))
+import Kanren.Subst (Subst, ext, walk)
+
 unify :: Term -> Term -> Subst -> Maybe Subst
 unify u v s = go (walk s u) (walk s v)
   where
@@ -12,7 +12,7 @@ unify u v s = go (walk s u) (walk s v)
   go (TmVar u1) v1 = Just $ ext u1 v1 s
   go u1 (TmVar v1) = Just $ ext v1 u1 s
   go (TmObj o1) (TmObj o2) | o1 == o2 = Just s
-  go (TmPair a1 b1) (TmPair a2 b2) = 
+  go (TmPair a1 b1) (TmPair a2 b2) =
     case unify a1 a2 s of
       Nothing -> Nothing
       Just s' -> unify b1 b2 s'
