@@ -38677,7 +38677,7 @@ var render = function (send) {
                             return send(UpdateCode.create((function (v2) {
                                 return v2.target.value;
                             })(Unsafe_Coerce.unsafeCoerce($102))));
-                        }) ])([  ]) ]), React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.div([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Edit Definitions") ]), React_DOM.textarea([ React_DOM_Props.value(state.code), React_DOM_Props.onChange(function ($103) {
+                        }) ])([  ]) ]), React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.div([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Edit Definitions") ]), React_DOM.textarea([ React_DOM_Props.value(state.defnsCode), React_DOM_Props.onChange(function ($103) {
                             return send(UpdateDefinitions.create((function (v2) {
                                 return v2.target.value;
                             })(Unsafe_Coerce.unsafeCoerce($103))));

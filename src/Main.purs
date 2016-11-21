@@ -335,7 +335,7 @@ render send _ state _ =
                        [ RD.div [ RP.className "panel-heading"]
                                 [ RD.text "Edit Definitions" ]
 
-                       , RD.textarea [ RP.value state.code
+                       , RD.textarea [ RP.value state.defnsCode
                                      , RP.onChange (send <<< UpdateDefinitions <<< _.target.value <<< unsafeCoerce)
                                      ] []
                        ]
