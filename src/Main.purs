@@ -98,49 +98,37 @@ run state =
 
 render :: forall a. T.Render AppState a Action
 render send _ state _ =
-    [ RD.div [ RP.className "row" ]
-             [ RD.div [ RP.className "col-xs-12" ]
-                      [ RD.h2' [ RD.text "mu-kanren" ]
-                      , RD.p' [ RD.text "A step-by-step evaluator for a dialect of "
-                              , RD.a [ RP.href "https://github.com/jasonhemann/microKanren" ]
-                                     [ RD.text "microKanren" ]
-                              ]
-                      ]
-             ]
-    , RD.div [ RP.className "row" ]
-             [ RD.div [ RP.className "col-xs-12" ] [ navBar ] ]
-    , RD.div [ RP.className "row" ]
-             [ leftColumn
-             , rightColumn
-             ]
-    , RD.div [ RP.className "row" ]
-             [ RD.div [ RP.className "col-xs-12" ]
-                      [ RD.small' [ RD.text "Made by "
-                                  , RD.a [ RP.href "http://twitter.com/paf31" ]
-                                         [ RD.text "@paf31" ]
-                                  , RD.text " using "
-                                  , RD.a [ RP.href "http://purescript.org" ]
-                                         [ RD.text "PureScript" ]
-                                  , RD.text "."
-                                  ]
-                     ]
-             ]
+    [ RD.h2' [ RD.text "mu-kanren" ]
+    , RD.p' [ RD.text "A step-by-step evaluator for a dialect of "
+            , RD.a [ RP.href "https://github.com/jasonhemann/microKanren" ]
+                   [ RD.text "microKanren" ]
+            ]
+    , RD.p' [ RD.small' [ RD.text "Made by "
+                        , RD.a [ RP.href "http://twitter.com/paf31" ]
+                               [ RD.text "@paf31" ]
+                        , RD.text " using "
+                        , RD.a [ RP.href "http://purescript.org" ]
+                               [ RD.text "PureScript" ]
+                        , RD.text " and "
+                        , RD.a [ RP.href "https://github.com/paf31/purescript-thermite" ]
+                               [ RD.text "Thermite" ]
+                        , RD.text "."
+                        ]
+            ]
+    , goalPane
+    , editorPane
+    , errorPane
+    , substPane
+    , remainingGoalPane
+    , stackPane
     ]
   where
-    rightColumn :: ReactElement
-    rightColumn | state.editing = RD.div' []
-                | otherwise =
-      RD.div [ RP.className "col-xs-6" ]
-             [ substPane
-             , remainingGoalPane
-             , stackPane
-             ]
-
     substPane :: ReactElement
-    substPane =
+    substPane | state.editing = RD.div' []
+              | otherwise =
         RD.div [ RP.className "panel panel-default"]
-               [ RD.div [ RP.className "panel-heading"]
-                        [ RD.text "Substitution" ]
+               [ RD.h5 [ RP.className "panel-heading"]
+                       [ RD.text "Substitution" ]
                , RD.table [ RP.className "table table-condensed"]
                           [ RD.thead' [ RD.tr' [ RD.th' [ RD.text "Unknown" ]
                                                , RD.th' [ RD.text "Term" ]
@@ -157,10 +145,11 @@ render send _ state _ =
                  ]
 
     remainingGoalPane :: ReactElement
-    remainingGoalPane =
+    remainingGoalPane | state.editing = RD.div' []
+                      | otherwise =
         RD.div [ RP.className "panel panel-default"]
-               [ RD.div [ RP.className "panel-heading"]
-                        [ RD.text "Remaining Goals" ]
+               [ RD.h5 [ RP.className "panel-heading"]
+                       [ RD.text "Remaining Goals" ]
                , RD.table [ RP.className "table table-condensed"]
                           [ RD.tbody' (fromFoldable (map toRow (stateStack state.state)))
                           ]
@@ -171,10 +160,11 @@ render send _ state _ =
           RD.tr' [ RD.td' [ RD.code' [ RD.text (renderShortGoal g) ] ] ]
 
     stackPane :: ReactElement
-    stackPane =
+    stackPane | state.editing = RD.div' []
+              | otherwise =
         RD.div [ RP.className "panel panel-default"]
-               [ RD.div [ RP.className "panel-heading"]
-                        [ RD.text "Execution Trace" ]
+               [ RD.h5 [ RP.className "panel-heading"]
+                       [ RD.text "Execution Trace" ]
                , RD.table [ RP.className "table table-condensed"]
                           [ RD.tbody' (fromFoldable (map toRow (stateHistory state.state)))
                           ]
@@ -206,44 +196,28 @@ render send _ state _ =
       go acc _  Nil      = acc
       go acc ys (x : xs) = go (Tuple x (ys <> xs) : acc) (ys <> singleton x) xs
 
-    leftColumn :: ReactElement
-    leftColumn =
-      RD.div [ RP.className (if state.editing then "col-xs-12" else "col-xs-6") ]
-             [ goalPane
-             , editorPane
-             , errorPane
-             ]
-
-    navBar :: ReactElement
-    navBar =
-      RD.ul [ RP.className "nav nav-pills" ]
-            [ RD.li [ RP.role "presentation" ]
-                    [ RD.a [ RP.href "#"
-                           , RP.onClick \_ -> send ToggleEditing
-                           ]
-                           [ RD.span [ RP.className (if state.editing then "fa fa-play" else "fa fa-edit") ] []
-                           , RD.text (if state.editing then " Run" else " Edit")
-                           ]
-                    ]
-            , RD.li [ RP.role "presentation" ]
-                    [ RD.a [ RP.href "https://github.com/functorial/mu-kanren/blob/gh-pages/README.md"
-                           , RP.target "_blank"
-                           ]
-                           [ RD.span [ RP.className "fa fa-question" ] []
-                           , RD.text " Help"
-                           ]
-                    ]
-            ]
-
     goalPane :: ReactElement
     goalPane | state.editing = RD.div' []
              | otherwise =
         RD.div [ RP.className "panel panel-default"]
-               [ RD.div [ RP.className "panel-heading"]
-                        [ RD.text "Current Goal" ]
+               [ RD.h5 [ RP.className "panel-heading"]
+                       [ RD.text "Current Goal" ]
 
                , RD.div [ RP.className "lines" ]
                         (renderGoal true (stateGoal state.state))
+               , RD.div [ RP.className "panel-footer" ]
+                        [ RD.div [ RP.className "btn-group"
+                                 , RP.role "group"
+                                 ]
+                                 [ RD.a [ RP.href "#"
+                                        , RP.className "btn btn-primary"
+                                        , RP.onClick \_ -> send ToggleEditing
+                                        ]
+                                        [ RD.span [ RP.className "fa fa-stop" ] []
+                                        , RD.text " Stop"
+                                        ]
+                                 ]
+                       ]
                ]
       where
         renderGoal :: Boolean -> Goal -> Array ReactElement
@@ -324,17 +298,36 @@ render send _ state _ =
     editorPane | not state.editing = RD.div' []
                | otherwise =
       RD.div' [ RD.div [ RP.className "panel panel-default"]
-                       [ RD.div [ RP.className "panel-heading"]
-                                [ RD.text "Edit Goal" ]
+                       [ RD.h5 [ RP.className "panel-heading" ]
+                               [ RD.text "Edit Goal" ]
 
                        , RD.textarea [ RP.value state.code
                                      , RP.onChange (send <<< UpdateCode <<< _.target.value <<< unsafeCoerce)
                                      ] []
+                       , RD.div [ RP.className "panel-footer" ]
+                                [ RD.div [ RP.className "btn-group"
+                                         , RP.role "group"
+                                         ]
+                                         [ RD.a [ RP.href "#"
+                                                , RP.className "btn btn-primary"
+                                                , RP.onClick \_ -> send ToggleEditing
+                                                ]
+                                                [ RD.span [ RP.className "fa fa-play" ] []
+                                                , RD.text " Run"
+                                                ]
+                                         , RD.a [ RP.href "https://github.com/functorial/mu-kanren/blob/gh-pages/README.md"
+                                                , RP.target "_blank"
+                                                , RP.className "btn btn-default"
+                                                ]
+                                                [ RD.span [ RP.className "fa fa-question" ] []
+                                                , RD.text " Help"
+                                                ]
+                                         ]
+                                ]
                        ]
               , RD.div [ RP.className "panel panel-default"]
-                       [ RD.div [ RP.className "panel-heading"]
-                                [ RD.text "Edit Definitions" ]
-
+                       [ RD.h5 [ RP.className "panel-heading"]
+                               [ RD.text "Edit Definitions" ]
                        , RD.textarea [ RP.value state.defnsCode
                                      , RP.onChange (send <<< UpdateDefinitions <<< _.target.value <<< unsafeCoerce)
                                      ] []

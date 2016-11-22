@@ -38377,8 +38377,8 @@ var Data_Functor = require("../Data.Functor");
 var Data_List_Types = require("../Data.List.Types");
 var Data_Semigroup = require("../Data.Semigroup");
 var Data_Show = require("../Data.Show");
-var Data_Ord = require("../Data.Ord");
 var Data_Boolean = require("../Data.Boolean");
+var Data_Ord = require("../Data.Ord");
 var Control_Semigroupoid = require("../Control.Semigroupoid");
 var Data_Ring = require("../Data.Ring");
 var Data_Semiring = require("../Data.Semiring");
@@ -38426,31 +38426,31 @@ var GoToState = (function () {
     return GoToState;
 })();
 var run = function (state) {
-    var $22 = Control_Apply.apply(Data_Either.applyEither)(Data_Functor.map(Data_Either.functorEither)(Data_Tuple.Tuple.create)(Kanren_Parser.parseGoal(state.code)))(Kanren_Parser.parseDefines(state.defnsCode));
-    if ($22 instanceof Data_Either.Left) {
-        var $23 = {};
-        for (var $24 in state) {
-            if (state.hasOwnProperty($24)) {
-                $23[$24] = state[$24];
+    var $23 = Control_Apply.apply(Data_Either.applyEither)(Data_Functor.map(Data_Either.functorEither)(Data_Tuple.Tuple.create)(Kanren_Parser.parseGoal(state.code)))(Kanren_Parser.parseDefines(state.defnsCode));
+    if ($23 instanceof Data_Either.Left) {
+        var $24 = {};
+        for (var $25 in state) {
+            if (state.hasOwnProperty($25)) {
+                $24[$25] = state[$25];
             };
         };
-        $23.error = new Data_Maybe.Just($22.value0);
-        return $23;
+        $24.error = new Data_Maybe.Just($23.value0);
+        return $24;
     };
-    if ($22 instanceof Data_Either.Right) {
-        var $27 = {};
-        for (var $28 in state) {
-            if (state.hasOwnProperty($28)) {
-                $27[$28] = state[$28];
+    if ($23 instanceof Data_Either.Right) {
+        var $28 = {};
+        for (var $29 in state) {
+            if (state.hasOwnProperty($29)) {
+                $28[$29] = state[$29];
             };
         };
-        $27.error = Data_Maybe.Nothing.value;
-        $27.editing = false;
-        $27.state = new Kanren_State.State($22.value0.value0, Data_List_Types.Nil.value, Kanren_Var.zero, Data_List_Types.Nil.value, Data_List_Types.Nil.value);
-        $27.definitions = $22.value0.value1;
-        return $27;
+        $28.error = Data_Maybe.Nothing.value;
+        $28.editing = false;
+        $28.state = new Kanren_State.State($23.value0.value0, Data_List_Types.Nil.value, Kanren_Var.zero, Data_List_Types.Nil.value, Data_List_Types.Nil.value);
+        $28.definitions = $23.value0.value1;
+        return $28;
     };
-    throw new Error("Failed pattern match at Main line 89, column 3 - line 97, column 14: " + [ $22.constructor.name ]);
+    throw new Error("Failed pattern match at Main line 89, column 3 - line 97, column 14: " + [ $23.constructor.name ]);
 };
 var render = function (send) {
     return function (v) {
@@ -38469,13 +38469,19 @@ var render = function (send) {
                     if (v2 instanceof Kanren_Term.TmPair) {
                         return "(" + (renderTerm(v2.value0) + (" " + (renderTerm(v2.value1) + ")")));
                     };
-                    throw new Error("Failed pattern match at Main line 319, column 5 - line 319, column 51: " + [ v2.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 293, column 5 - line 293, column 51: " + [ v2.constructor.name ]);
                 };
                 var substPane = (function () {
-                    var toRow = function (v2) {
-                        return React_DOM["tr'"]([ React_DOM["td'"]([ React_DOM["code'"]([ React_DOM.text("#" + Data_Show.show(Data_Show.showInt)(v2.value0)) ]) ]), React_DOM["td'"]([ React_DOM["code'"]([ React_DOM.text(renderTerm(Kanren_Subst.walk(Kanren_State.stateSubst(state.state))(v2.value1))) ]) ]) ]);
+                    if (state.editing) {
+                        return React_DOM["div'"]([  ]);
                     };
-                    return React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.div([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Substitution") ]), React_DOM.table([ React_DOM_Props.className("table table-condensed") ])([ React_DOM["thead'"]([ React_DOM["tr'"]([ React_DOM["th'"]([ React_DOM.text("Unknown") ]), React_DOM["th'"]([ React_DOM.text("Term") ]) ]) ]), React_DOM["tbody'"](Data_Functor.map(Data_Functor.functorArray)(toRow)(Data_Array.fromFoldable(Data_List_Types.foldableList)(Data_List.sortBy(Data_Ord.comparing(Kanren_Var.ordVar)(Data_Tuple.fst))(Kanren_State.stateSubst(state.state))))) ]) ]);
+                    if (Data_Boolean.otherwise) {
+                        var toRow = function (v2) {
+                            return React_DOM["tr'"]([ React_DOM["td'"]([ React_DOM["code'"]([ React_DOM.text("#" + Data_Show.show(Data_Show.showInt)(v2.value0)) ]) ]), React_DOM["td'"]([ React_DOM["code'"]([ React_DOM.text(renderTerm(Kanren_Subst.walk(Kanren_State.stateSubst(state.state))(v2.value1))) ]) ]) ]);
+                        };
+                        return React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.h5([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Substitution") ]), React_DOM.table([ React_DOM_Props.className("table table-condensed") ])([ React_DOM["thead'"]([ React_DOM["tr'"]([ React_DOM["th'"]([ React_DOM.text("Unknown") ]), React_DOM["th'"]([ React_DOM.text("Term") ]) ]) ]), React_DOM["tbody'"](Data_Functor.map(Data_Functor.functorArray)(toRow)(Data_Array.fromFoldable(Data_List_Types.foldableList)(Data_List.sortBy(Data_Ord.comparing(Kanren_Var.ordVar)(Data_Tuple.fst))(Kanren_State.stateSubst(state.state))))) ]) ]);
+                    };
+                    throw new Error("Failed pattern match at Main line 127, column 5 - line 145, column 19: " + [  ]);
                 })();
                 var renderShortGoal = function (v2) {
                     if (v2 instanceof Kanren_Goal.Done) {
@@ -38499,50 +38505,34 @@ var render = function (send) {
                     if (v2 instanceof Kanren_Goal.Named) {
                         return v2.value0;
                     };
-                    throw new Error("Failed pattern match at Main line 192, column 5 - line 193, column 5: " + [ v2.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 182, column 5 - line 183, column 5: " + [ v2.constructor.name ]);
                 };
                 var stackPane = (function () {
-                    var toRow = function (s) {
-                        return React_DOM["tr'"]([ React_DOM["td'"]([ React_DOM.a([ React_DOM_Props.href("#"), React_DOM_Props.onClick(function (v2) {
-                            return send(new GoToState(s));
-                        }) ])([ React_DOM["code'"]([ React_DOM.text(renderShortGoal(Kanren_State.stateGoal(s))) ]) ]) ]) ]);
-                    };
-                    return React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.div([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Execution Trace") ]), React_DOM.table([ React_DOM_Props.className("table table-condensed") ])([ React_DOM["tbody'"](Data_Array.fromFoldable(Data_List_Types.foldableList)(Data_Functor.map(Data_List_Types.functorList)(toRow)(Kanren_State.stateHistory(state.state)))) ]) ]);
-                })();
-                var remainingGoalPane = (function () {
-                    var toRow = function (g) {
-                        return React_DOM["tr'"]([ React_DOM["td'"]([ React_DOM["code'"]([ React_DOM.text(renderShortGoal(g)) ]) ]) ]);
-                    };
-                    return React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.div([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Remaining Goals") ]), React_DOM.table([ React_DOM_Props.className("table table-condensed") ])([ React_DOM["tbody'"](Data_Array.fromFoldable(Data_List_Types.foldableList)(Data_Functor.map(Data_List_Types.functorList)(toRow)(Kanren_State.stateStack(state.state)))) ]) ]);
-                })();
-                var rightColumn = (function () {
                     if (state.editing) {
                         return React_DOM["div'"]([  ]);
                     };
                     if (Data_Boolean.otherwise) {
-                        return React_DOM.div([ React_DOM_Props.className("col-xs-6") ])([ substPane, remainingGoalPane, stackPane ]);
+                        var toRow = function (s) {
+                            return React_DOM["tr'"]([ React_DOM["td'"]([ React_DOM.a([ React_DOM_Props.href("#"), React_DOM_Props.onClick(function (v2) {
+                                return send(new GoToState(s));
+                            }) ])([ React_DOM["code'"]([ React_DOM.text(renderShortGoal(Kanren_State.stateGoal(s))) ]) ]) ]) ]);
+                        };
+                        return React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.h5([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Execution Trace") ]), React_DOM.table([ React_DOM_Props.className("table table-condensed") ])([ React_DOM["tbody'"](Data_Array.fromFoldable(Data_List_Types.foldableList)(Data_Functor.map(Data_List_Types.functorList)(toRow)(Kanren_State.stateHistory(state.state)))) ]) ]);
                     };
-                    throw new Error("Failed pattern match at Main line 131, column 5 - line 137, column 15: " + [  ]);
+                    throw new Error("Failed pattern match at Main line 163, column 5 - line 179, column 19: " + [  ]);
                 })();
-                var navBar = React_DOM.ul([ React_DOM_Props.className("nav nav-pills") ])([ React_DOM.li([ React_DOM_Props.role("presentation") ])([ React_DOM.a([ React_DOM_Props.href("#"), React_DOM_Props.onClick(function (v2) {
-                    return send(ToggleEditing.value);
-                }) ])([ React_DOM.span([ React_DOM_Props.className((function () {
+                var remainingGoalPane = (function () {
                     if (state.editing) {
-                        return "fa fa-play";
+                        return React_DOM["div'"]([  ]);
                     };
-                    if (!state.editing) {
-                        return "fa fa-edit";
+                    if (Data_Boolean.otherwise) {
+                        var toRow = function (g) {
+                            return React_DOM["tr'"]([ React_DOM["td'"]([ React_DOM["code'"]([ React_DOM.text(renderShortGoal(g)) ]) ]) ]);
+                        };
+                        return React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.h5([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Remaining Goals") ]), React_DOM.table([ React_DOM_Props.className("table table-condensed") ])([ React_DOM["tbody'"](Data_Array.fromFoldable(Data_List_Types.foldableList)(Data_Functor.map(Data_List_Types.functorList)(toRow)(Kanren_State.stateStack(state.state)))) ]) ]);
                     };
-                    throw new Error("Failed pattern match at Main line 224, column 54 - line 224, column 106: " + [ state.editing.constructor.name ]);
-                })()) ])([  ]), React_DOM.text((function () {
-                    if (state.editing) {
-                        return " Run";
-                    };
-                    if (!state.editing) {
-                        return " Edit";
-                    };
-                    throw new Error("Failed pattern match at Main line 225, column 39 - line 225, column 80: " + [ state.editing.constructor.name ]);
-                })()) ]) ]), React_DOM.li([ React_DOM_Props.role("presentation") ])([ React_DOM.a([ React_DOM_Props.href("https://github.com/functorial/mu-kanren/blob/gh-pages/README.md"), React_DOM_Props.target("_blank") ])([ React_DOM.span([ React_DOM_Props.className("fa fa-question") ])([  ]), React_DOM.text(" Help") ]) ]) ]);
+                    throw new Error("Failed pattern match at Main line 148, column 5 - line 160, column 73: " + [  ]);
+                })();
                 var inContext = (function () {
                     var go = function (__copy_acc) {
                         return function (__copy_v2) {
@@ -38563,7 +38553,7 @@ var render = function (send) {
                                         v3 = __tco_v3;
                                         continue tco;
                                     };
-                                    throw new Error("Failed pattern match at Main line 204, column 5 - line 207, column 80: " + [ acc.constructor.name, v2.constructor.name, v3.constructor.name ]);
+                                    throw new Error("Failed pattern match at Main line 194, column 5 - line 197, column 80: " + [ acc.constructor.name, v2.constructor.name, v3.constructor.name ]);
                                 };
                             };
                         };
@@ -38585,7 +38575,7 @@ var render = function (send) {
                                 if (!v2) {
                                     return React_DOM["span'"];
                                 };
-                                throw new Error("Failed pattern match at Main line 307, column 9 - line 309, column 34: " + [ v2.constructor.name, v3.constructor.name ]);
+                                throw new Error("Failed pattern match at Main line 281, column 9 - line 283, column 34: " + [ v2.constructor.name, v3.constructor.name ]);
                             };
                         };
                         var line = function (x) {
@@ -38604,8 +38594,8 @@ var render = function (send) {
                                 };
                                 if (v3 instanceof Kanren_Goal.Fresh) {
                                     var curVar = Kanren_State.stateVar(state.state);
-                                    var freshNames = Data_Functor.map(Data_List_Types.functorList)(function ($101) {
-                                        return Kanren_Term.TmVar.create(Kanren_Var.Var($101));
+                                    var freshNames = Data_Functor.map(Data_List_Types.functorList)(function ($100) {
+                                        return Kanren_Term.TmVar.create(Kanren_Var.Var($100));
                                     })(Data_List.range(Kanren_Var.runVar(curVar))((Kanren_Var.runVar(curVar) + Data_List.length(v3.value0) | 0) - 1));
                                     var newState = new Kanren_State.State(Kanren_Eval.replaceAll(Data_List.zip(v3.value0)(freshNames))(v3.value1), Kanren_State.stateSubst(state.state), Kanren_Var.runVar(curVar) + Data_List.length(v3.value0) | 0, Kanren_State.stateStack(state.state), new Data_List_Types.Cons(state.state, Kanren_State.stateHistory(state.state)));
                                     return [ line(link(v2)(new GoToState(newState))([ React_DOM.text("(fresh " + (Data_Foldable.intercalate(Data_List_Types.foldableList)(Data_Monoid.monoidString)(" ")(v3.value0) + "")) ])), indented(renderGoal(false)(v3.value1)), line(React_DOM.text(")")) ];
@@ -38617,14 +38607,14 @@ var render = function (send) {
                                     var rgs = Kanren_State.stateStack(state.state);
                                     var hist = Kanren_State.stateHistory(state.state);
                                     var nextState = (function () {
-                                        var $66 = Kanren_Unify.unify(v3.value0)(v3.value1)(subst);
-                                        if ($66 instanceof Data_Maybe.Nothing) {
+                                        var $64 = Kanren_Unify.unify(v3.value0)(v3.value1)(subst);
+                                        if ($64 instanceof Data_Maybe.Nothing) {
                                             return new Kanren_State.State(Kanren_Goal.Fail.value, subst, $$var, rgs, new Data_List_Types.Cons(state.state, hist));
                                         };
-                                        if ($66 instanceof Data_Maybe.Just) {
-                                            return Kanren_State.unwindStack(new Kanren_State.State(Kanren_Goal.Done.value, $66.value0, $$var, rgs, new Data_List_Types.Cons(state.state, hist)));
+                                        if ($64 instanceof Data_Maybe.Just) {
+                                            return Kanren_State.unwindStack(new Kanren_State.State(Kanren_Goal.Done.value, $64.value0, $$var, rgs, new Data_List_Types.Cons(state.state, hist)));
                                         };
-                                        throw new Error("Failed pattern match at Main line 270, column 27 - line 272, column 92: " + [ $66.constructor.name ]);
+                                        throw new Error("Failed pattern match at Main line 244, column 27 - line 246, column 92: " + [ $64.constructor.name ]);
                                     })();
                                     return [ line(link(v2)(new GoToState(nextState))([ React_DOM.text(text) ])) ];
                                 };
@@ -38641,23 +38631,25 @@ var render = function (send) {
                                     return [ line(React_DOM.text("(conj")), React_DOM["div'"](Data_Array.fromFoldable(Data_List_Types.foldableList)(Data_Functor.map(Data_List_Types.functorList)(toLink)(inContext(v3.value0)))), line(React_DOM.text(")")) ];
                                 };
                                 if (v3 instanceof Kanren_Goal.Named) {
-                                    var $75 = Kanren_Eval.builtIn(state.definitions)(v3.value0)(v3.value1);
-                                    if ($75 instanceof Data_Either.Left) {
-                                        return [ React_DOM["p'"]([ React_DOM.text($75.value0) ]) ];
+                                    var $73 = Kanren_Eval.builtIn(state.definitions)(v3.value0)(v3.value1);
+                                    if ($73 instanceof Data_Either.Left) {
+                                        return [ React_DOM["p'"]([ React_DOM.text($73.value0) ]) ];
                                     };
-                                    if ($75 instanceof Data_Either.Right) {
+                                    if ($73 instanceof Data_Either.Right) {
                                         var text = "(" + (v3.value0 + (" " + (Data_Foldable.intercalate(Data_List_Types.foldableList)(Data_Monoid.monoidString)(" ")(Data_Functor.map(Data_List_Types.functorList)(renderTerm)(v3.value1)) + ")")));
-                                        var newState = Kanren_State.pushGoal($75.value0)(state.state);
+                                        var newState = Kanren_State.pushGoal($73.value0)(state.state);
                                         return [ line(link(v2)(new GoToState(newState))([ React_DOM.text(text) ])) ];
                                     };
-                                    throw new Error("Failed pattern match at Main line 299, column 11 - line 304, column 83: " + [ $75.constructor.name ]);
+                                    throw new Error("Failed pattern match at Main line 273, column 11 - line 278, column 83: " + [ $73.constructor.name ]);
                                 };
-                                throw new Error("Failed pattern match at Main line 250, column 9 - line 250, column 82: " + [ v2.constructor.name, v3.constructor.name ]);
+                                throw new Error("Failed pattern match at Main line 224, column 9 - line 224, column 82: " + [ v2.constructor.name, v3.constructor.name ]);
                             };
                         };
-                        return React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.div([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Current Goal") ]), React_DOM.div([ React_DOM_Props.className("lines") ])(renderGoal(true)(Kanren_State.stateGoal(state.state))) ]);
+                        return React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.h5([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Current Goal") ]), React_DOM.div([ React_DOM_Props.className("lines") ])(renderGoal(true)(Kanren_State.stateGoal(state.state))), React_DOM.div([ React_DOM_Props.className("panel-footer") ])([ React_DOM.div([ React_DOM_Props.className("btn-group"), React_DOM_Props.role("group") ])([ React_DOM.a([ React_DOM_Props.href("#"), React_DOM_Props.className("btn btn-primary"), React_DOM_Props.onClick(function (v2) {
+                            return send(ToggleEditing.value);
+                        }) ])([ React_DOM.span([ React_DOM_Props.className("fa fa-stop") ])([  ]), React_DOM.text(" Stop") ]) ]) ]) ]);
                     };
-                    throw new Error("Failed pattern match at Main line 239, column 5 - line 316, column 54: " + [  ]);
+                    throw new Error("Failed pattern match at Main line 200, column 5 - line 290, column 54: " + [  ]);
                 })();
                 var errorPane = (function () {
                     if (state.error instanceof Data_Maybe.Nothing) {
@@ -38666,35 +38658,28 @@ var render = function (send) {
                     if (state.error instanceof Data_Maybe.Just) {
                         return React_DOM.div([ React_DOM_Props.className("alert alert-danger alert-dismissible"), React_DOM_Props.role("alert") ])([ React_DOM.text(state.error.value0) ]);
                     };
-                    throw new Error("Failed pattern match at Main line 346, column 7 - line 353, column 33: " + [ state.error.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 339, column 7 - line 346, column 33: " + [ state.error.constructor.name ]);
                 })();
                 var editorPane = (function () {
                     if (!state.editing) {
                         return React_DOM["div'"]([  ]);
                     };
                     if (Data_Boolean.otherwise) {
-                        return React_DOM["div'"]([ React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.div([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Edit Goal") ]), React_DOM.textarea([ React_DOM_Props.value(state.code), React_DOM_Props.onChange(function ($102) {
+                        return React_DOM["div'"]([ React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.h5([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Edit Goal") ]), React_DOM.textarea([ React_DOM_Props.value(state.code), React_DOM_Props.onChange(function ($101) {
                             return send(UpdateCode.create((function (v2) {
                                 return v2.target.value;
-                            })(Unsafe_Coerce.unsafeCoerce($102))));
-                        }) ])([  ]) ]), React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.div([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Edit Definitions") ]), React_DOM.textarea([ React_DOM_Props.value(state.defnsCode), React_DOM_Props.onChange(function ($103) {
+                            })(Unsafe_Coerce.unsafeCoerce($101))));
+                        }) ])([  ]), React_DOM.div([ React_DOM_Props.className("panel-footer") ])([ React_DOM.div([ React_DOM_Props.className("btn-group"), React_DOM_Props.role("group") ])([ React_DOM.a([ React_DOM_Props.href("#"), React_DOM_Props.className("btn btn-primary"), React_DOM_Props.onClick(function (v2) {
+                            return send(ToggleEditing.value);
+                        }) ])([ React_DOM.span([ React_DOM_Props.className("fa fa-play") ])([  ]), React_DOM.text(" Run") ]), React_DOM.a([ React_DOM_Props.href("https://github.com/functorial/mu-kanren/blob/gh-pages/README.md"), React_DOM_Props.target("_blank"), React_DOM_Props.className("btn btn-default") ])([ React_DOM.span([ React_DOM_Props.className("fa fa-question") ])([  ]), React_DOM.text(" Help") ]) ]) ]) ]), React_DOM.div([ React_DOM_Props.className("panel panel-default") ])([ React_DOM.h5([ React_DOM_Props.className("panel-heading") ])([ React_DOM.text("Edit Definitions") ]), React_DOM.textarea([ React_DOM_Props.value(state.defnsCode), React_DOM_Props.onChange(function ($102) {
                             return send(UpdateDefinitions.create((function (v2) {
                                 return v2.target.value;
-                            })(Unsafe_Coerce.unsafeCoerce($103))));
+                            })(Unsafe_Coerce.unsafeCoerce($102))));
                         }) ])([  ]) ]) ]);
                     };
-                    throw new Error("Failed pattern match at Main line 324, column 5 - line 342, column 16: " + [  ]);
+                    throw new Error("Failed pattern match at Main line 298, column 5 - line 335, column 16: " + [  ]);
                 })();
-                var leftColumn = React_DOM.div([ React_DOM_Props.className((function () {
-                    if (state.editing) {
-                        return "col-xs-12";
-                    };
-                    if (!state.editing) {
-                        return "col-xs-6";
-                    };
-                    throw new Error("Failed pattern match at Main line 211, column 30 - line 211, column 79: " + [ state.editing.constructor.name ]);
-                })()) ])([ goalPane, editorPane, errorPane ]);
-                return [ React_DOM.div([ React_DOM_Props.className("row") ])([ React_DOM.div([ React_DOM_Props.className("col-xs-12") ])([ React_DOM["h2'"]([ React_DOM.text("mu-kanren") ]), React_DOM["p'"]([ React_DOM.text("A step-by-step evaluator for a dialect of "), React_DOM.a([ React_DOM_Props.href("https://github.com/jasonhemann/microKanren") ])([ React_DOM.text("microKanren") ]) ]) ]) ]), React_DOM.div([ React_DOM_Props.className("row") ])([ React_DOM.div([ React_DOM_Props.className("col-xs-12") ])([ navBar ]) ]), React_DOM.div([ React_DOM_Props.className("row") ])([ leftColumn, rightColumn ]), React_DOM.div([ React_DOM_Props.className("row") ])([ React_DOM.div([ React_DOM_Props.className("col-xs-12") ])([ React_DOM["small'"]([ React_DOM.text("Made by "), React_DOM.a([ React_DOM_Props.href("http://twitter.com/paf31") ])([ React_DOM.text("@paf31") ]), React_DOM.text(" using "), React_DOM.a([ React_DOM_Props.href("http://purescript.org") ])([ React_DOM.text("PureScript") ]), React_DOM.text(".") ]) ]) ]) ];
+                return [ React_DOM["h2'"]([ React_DOM.text("mu-kanren") ]), React_DOM["p'"]([ React_DOM.text("A step-by-step evaluator for a dialect of "), React_DOM.a([ React_DOM_Props.href("https://github.com/jasonhemann/microKanren") ])([ React_DOM.text("microKanren") ]) ]), React_DOM["p'"]([ React_DOM["small'"]([ React_DOM.text("Made by "), React_DOM.a([ React_DOM_Props.href("http://twitter.com/paf31") ])([ React_DOM.text("@paf31") ]), React_DOM.text(" using "), React_DOM.a([ React_DOM_Props.href("http://purescript.org") ])([ React_DOM.text("PureScript") ]), React_DOM.text(" and "), React_DOM.a([ React_DOM_Props.href("https://github.com/paf31/purescript-thermite") ])([ React_DOM.text("Thermite") ]), React_DOM.text(".") ]) ]), goalPane, editorPane, errorPane, substPane, remainingGoalPane, stackPane ];
             };
         };
     };
@@ -38704,49 +38689,49 @@ var performAction = function (action) {
         return function (v1) {
             return Data_Functor["void"](Control_Monad_Free_Trans.functorFreeT(Control_Coroutine.functorCoTransform)(Control_Monad_Aff.functorAff))(Thermite.modifyState(function (currentState) {
                 if (action instanceof UpdateCode) {
-                    var $84 = {};
-                    for (var $85 in currentState) {
-                        if (currentState.hasOwnProperty($85)) {
-                            $84[$85] = currentState[$85];
+                    var $83 = {};
+                    for (var $84 in currentState) {
+                        if (currentState.hasOwnProperty($84)) {
+                            $83[$84] = currentState[$84];
                         };
                     };
-                    $84.code = action.value0;
-                    return $84;
+                    $83.code = action.value0;
+                    return $83;
                 };
                 if (action instanceof UpdateDefinitions) {
-                    var $88 = {};
-                    for (var $89 in currentState) {
-                        if (currentState.hasOwnProperty($89)) {
-                            $88[$89] = currentState[$89];
+                    var $87 = {};
+                    for (var $88 in currentState) {
+                        if (currentState.hasOwnProperty($88)) {
+                            $87[$88] = currentState[$88];
                         };
                     };
-                    $88.defnsCode = action.value0;
-                    return $88;
+                    $87.defnsCode = action.value0;
+                    return $87;
                 };
                 if (action instanceof ToggleEditing) {
                     if (currentState.editing) {
                         return run(currentState);
                     };
                     if (Data_Boolean.otherwise) {
-                        var $92 = {};
-                        for (var $93 in currentState) {
-                            if (currentState.hasOwnProperty($93)) {
-                                $92[$93] = currentState[$93];
+                        var $91 = {};
+                        for (var $92 in currentState) {
+                            if (currentState.hasOwnProperty($92)) {
+                                $91[$92] = currentState[$92];
                             };
                         };
-                        $92.editing = true;
-                        return $92;
+                        $91.editing = true;
+                        return $91;
                     };
                 };
                 if (action instanceof GoToState) {
-                    var $95 = {};
-                    for (var $96 in currentState) {
-                        if (currentState.hasOwnProperty($96)) {
-                            $95[$96] = currentState[$96];
+                    var $94 = {};
+                    for (var $95 in currentState) {
+                        if (currentState.hasOwnProperty($95)) {
+                            $94[$95] = currentState[$95];
                         };
                     };
-                    $95.state = action.value0;
-                    return $95;
+                    $94.state = action.value0;
+                    return $94;
                 };
                 throw new Error("Failed pattern match at Main line 79, column 3 - line 85, column 58: " + [ action.constructor.name ]);
             }));
@@ -38770,10 +38755,10 @@ var main = Data_Functor["void"](Control_Monad_Eff.functorEff)((function () {
     var component = Thermite.createClass(spec)(initialState);
     return function __do() {
         var v = Control_Bind.bind(Control_Monad_Eff.bindEff)(DOM_HTML.window)(DOM_HTML_Window.document)();
-        var v1 = Data_Functor.map(Control_Monad_Eff.functorEff)(function ($104) {
+        var v1 = Data_Functor.map(Control_Monad_Eff.functorEff)(function ($103) {
             return Partial_Unsafe.unsafePartial(function (dictPartial) {
                 return Data_Maybe.fromJust(dictPartial);
-            })(Data_Nullable.toMaybe($104));
+            })(Data_Nullable.toMaybe($103));
         })(DOM_Node_ParentNode.querySelector("#app")(DOM_HTML_Types.htmlDocumentToParentNode(v)))();
         return ReactDOM.render(React.createFactory(component)(Data_Unit.unit))(v1)();
     };
