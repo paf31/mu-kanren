@@ -6,17 +6,16 @@ module Kanren.Parser
 import Prelude
 import Control.Alternative ((<|>))
 import Control.Lazy (fix)
+import Data.Array as A
 import Data.Either (Either(..))
 import Data.List (List(..), length, many, null, (:))
-import Data.Traversable (traverse)
-import Kanren.Goal (Define(..), Goal(..))
-import Kanren.Term (Term(..), obj)
-import Text.Parsing.Parser (Parser, parseErrorMessage, runParser)
-import Text.Parsing.Parser.Combinators (try)
-import Data.Array as A
 import Data.List.Partial as LP
 import Data.String as S
+import Data.Traversable (traverse)
+import Kanren.Types (Define(..), Goal(..), Term(..), obj)
 import Partial.Unsafe (unsafePartial)
+import Text.Parsing.Parser (Parser, parseErrorMessage, runParser)
+import Text.Parsing.Parser.Combinators (try)
 import Text.Parsing.Parser.String (eof, noneOf, string, whiteSpace)
 
 data Sexpr = Atom String | Sexpr (List Sexpr)

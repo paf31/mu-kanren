@@ -2,10 +2,7 @@ module Kanren.State where
 
 import Prelude
 import Data.List (List, (:))
-import Kanren.Goal (Goal(..))
-import Kanren.Stack (Stack)
-import Kanren.Subst (Subst)
-import Kanren.Var (Var)
+import Kanren.Types (Goal(..), Stack, Subst, Var)
 
 data State = State Goal Subst Var Stack (List State)
 

@@ -1,18 +1,7 @@
 module Main where
 
 import Prelude
-import Kanren.Var as Var
-import React as R
-import React.DOM as RD
-import React.DOM.Props as RP
-import ReactDOM as RDOM
-import Thermite as T
 import Control.Monad.Eff (Eff)
-import DOM (DOM) as DOM
-import DOM.HTML (window) as DOM
-import DOM.HTML.Types (htmlDocumentToParentNode) as DOM
-import DOM.HTML.Window (document) as DOM
-import DOM.Node.ParentNode (querySelector) as DOM
 import Data.Array (fromFoldable, replicate)
 import Data.Either (Either(..))
 import Data.List (List(..), intercalate, length, singleton, sortBy, zip, (..), (:))
@@ -20,16 +9,22 @@ import Data.Maybe (Maybe(..), fromJust)
 import Data.Nullable (toMaybe)
 import Data.String (fromCharArray, joinWith)
 import Data.Tuple (Tuple(..), fst)
-import Kanren.Eval (builtIn, replaceAll)
-import Kanren.Goal (Define, Goal(..))
-import Kanren.Obj (Obj(..))
-import Kanren.Parser (parseDefines, parseGoal)
-import Kanren.State (State(..), pushGoal, pushUnsolvedGoals, stateGoal, stateHistory, stateStack, stateSubst, stateVar, unwindStack)
-import Kanren.Subst (walk)
-import Kanren.Term (Term(..))
-import Kanren.Unify (unify)
+import DOM (DOM) as DOM
+import DOM.HTML (window) as DOM
+import DOM.HTML.Types (htmlDocumentToParentNode) as DOM
+import DOM.HTML.Window (document) as DOM
+import DOM.Node.ParentNode (querySelector) as DOM
+import Kanren (Define, Goal(..), Obj(..), State(..), Term(..), Var(..),
+               builtIn, parseDefines, parseGoal, pushGoal, pushUnsolvedGoals,
+               replaceAll, runVar, stateGoal, stateHistory, stateStack,
+               stateSubst, stateVar, unify, unwindStack, walk)
 import Partial.Unsafe (unsafePartial)
 import React (ReactElement)
+import React as R
+import React.DOM as RD
+import React.DOM.Props as RP
+import ReactDOM as RDOM
+import Thermite as T
 import Unsafe.Coerce (unsafeCoerce)
 
 type AppState =
@@ -64,7 +59,7 @@ initialState =
             , "  )"
             , ")"
             ]
-  , state: State Done Nil Var.zero Nil Nil
+  , state: State Done Nil (Var 0) Nil Nil
   , definitions: Nil
   }
 
@@ -92,7 +87,7 @@ run state =
     Right (Tuple goal defines) ->
       state { error       = Nothing
             , editing     = false
-            , state       = State goal Nil Var.zero Nil Nil
+            , state       = State goal Nil (Var 0) Nil Nil
             , definitions = defines
             }
 
@@ -138,8 +133,8 @@ render send _ state _ =
                           ]
                ]
       where
-        toRow :: Tuple Var.Var Term -> ReactElement
-        toRow (Tuple (Var.Var nm) tm) =
+        toRow :: Tuple Var Term -> ReactElement
+        toRow (Tuple (Var nm) tm) =
           RD.tr' [ RD.td' [ RD.code' [ RD.text ("#" <> show nm) ] ]
                  , RD.td' [ RD.code' [ RD.text (renderTerm (walk (stateSubst state.state) tm)) ] ]
                  ]
@@ -225,10 +220,10 @@ render send _ state _ =
         renderGoal _           Fail = [ RD.p' [ RD.text "Contradiction!" ] ]
         renderGoal renderLinks (Fresh ns g) =
           let curVar = stateVar state.state
-              freshNames = TmVar <<< Var.Var <$> (Var.runVar curVar .. (Var.runVar curVar + length ns - 1))
+              freshNames = TmVar <<< Var <$> (runVar curVar .. (runVar curVar + length ns - 1))
               newState = State (replaceAll (zip ns freshNames) g)
                                (stateSubst state.state)
-                               (Var.Var (Var.runVar curVar + length ns))
+                               (Var (runVar curVar + length ns))
                                (stateStack state.state)
                                (state.state : stateHistory state.state)
           in [ line (link renderLinks (GoToState newState) [ RD.text ("(fresh " <> intercalate " " ns <> "") ])
@@ -290,7 +285,7 @@ render send _ state _ =
         line x = RD.div [ RP.className "line" ] [ x ]
 
     renderTerm :: Term -> String
-    renderTerm (TmVar (Var.Var v)) = "#" <> show v
+    renderTerm (TmVar (Var v)) = "#" <> show v
     renderTerm (TmObj (Obj o)) = o
     renderTerm (TmPair t1 t2) = "(" <> renderTerm t1 <> " " <> renderTerm t2 <> ")"
 
